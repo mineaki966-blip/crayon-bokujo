@@ -375,8 +375,8 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
 @media (min-width:900px) and (orientation:landscape) and (min-height:560px){
  .wrap{padding-block:10px}
  /* かんたん かく */
- #sDraw{display:grid;--side:minmax(220px,250px);grid-template-columns:var(--side) auto var(--side);column-gap:18px;row-gap:10px;justify-content:center;align-content:start;
-  grid-template-rows:auto auto 1fr auto;grid-template-areas:"back tabs ." "left pad pal" "left pad right" ". hint .";--padw:min(calc(100svh - 160px),calc(100vw - 600px))}
+ #sDraw{display:grid;--side:minmax(200px,220px);grid-template-columns:var(--side) auto var(--side);column-gap:18px;row-gap:10px;justify-content:center;align-content:start;
+  grid-template-rows:auto auto 1fr auto;grid-template-areas:"back tabs ." "left pad pal" "left pad right" ". hint .";--padw:min(calc(100svh - 150px),calc(100vw - 560px))}
  #sDraw>*{align-self:start}
  .sideCol{display:contents}
  #dL,#dR,#d3L,#d3R{display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -385,10 +385,10 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
  #stamps{grid-template-columns:repeat(4,1fr)}
  #sDraw .pal{grid-template-columns:repeat(4,1fr)}
  /* くるくる3D */
- #sDraw3d{display:grid;--side:minmax(220px,250px);grid-template-columns:var(--side) auto var(--side);column-gap:18px;row-gap:10px;justify-content:center;align-content:start;
-  grid-template-rows:auto auto 1fr;grid-template-areas:"top top top" "left view rot" "left view right";--vw3:min(calc(100svh - 100px),calc(100vw - 600px))}
+ #sDraw3d{display:grid;--side:minmax(200px,220px);grid-template-columns:var(--side) minmax(0,1fr) var(--side);column-gap:18px;row-gap:10px;justify-content:center;align-content:start;
+  grid-template-rows:auto auto 1fr;grid-template-areas:"top top top" "left view rot" "left view right";}
  #sDraw3d>*{align-self:start}
- #sDraw3d>.mapTop{grid-area:top}#d3View{grid-area:view;width:var(--vw3)}#d3Rot{grid-area:rot;grid-template-columns:repeat(3,1fr)}#d3Rot button{padding:8px 0;min-height:0}#d3L{grid-area:left}#d3R{grid-area:right}
+ #sDraw3d>.mapTop{grid-area:top}#d3View{grid-area:view;width:100%;aspect-ratio:auto;height:calc(100svh - 80px)}#d3Rot{grid-area:rot;grid-template-columns:repeat(3,1fr)}#d3Rot button{padding:8px 0;min-height:0}#d3L{grid-area:left}#d3R{grid-area:right}
  #d3Stamps{grid-template-columns:repeat(4,1fr)}
  #d3Pal{grid-template-columns:repeat(5,1fr);gap:6px}#d3Pal .crayon{width:42px;height:42px}
  /* かくにん */
@@ -408,12 +408,12 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
 /* たてむき タブレット */
 @media (min-width:700px) and (orientation:portrait){
  #sDraw{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:10px;
-  grid-template-areas:"back tabs" "pad pad" "hint hint" "tools pal" "stamps legend" "tools3 nm" "msg go";--padw:min(calc(100vw - 40px),calc(100svh - 620px))}
+  grid-template-areas:"back tabs" "pad pad" "hint hint" "tools pal" "stamps legend" "tools3 nm" "msg go";--padw:min(calc(100vw - 40px),calc(100svh - 595px))}
  #sDraw>#dBack{grid-area:back}#sideTabs{grid-area:tabs;width:calc(var(--padw) * .6);justify-self:end}#pad{grid-area:pad;width:var(--padw);justify-self:center}
  #phint{grid-area:hint}#tools{grid-area:pal}#tools2{grid-area:tools}#stamps{grid-area:stamps}#tools3{grid-area:tools3}#legend{grid-area:legend}
  #sDraw .nmrow{grid-area:nm}#dmsg{grid-area:msg}#go{grid-area:go}#sDraw>.note{display:none}
  #sDraw3d{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:10px;grid-template-areas:"top top" "view view" "rot rot" "tools pal" "stamps msg" "nm go"}
- #sDraw3d>.mapTop{grid-area:top}#d3View{grid-area:view;width:min(calc(100vw - 40px),calc(100svh - 580px));justify-self:center}#d3Rot{grid-area:rot}#d3Tools{grid-area:tools}#d3Stamps{grid-area:stamps}
+ #sDraw3d>.mapTop{grid-area:top}#d3View{grid-area:view;width:100%;aspect-ratio:auto;height:max(320px,calc(100svh - 560px))}#d3Rot{grid-area:rot}#d3Tools{grid-area:tools}#d3Stamps{grid-area:stamps}
  #d3Pal{grid-area:pal}#d3Msg{grid-area:msg}#sDraw3d .nmrow{grid-area:nm}#d3Done{grid-area:go}
  #cardView{height:min(50svh,600px)!important}
  #sCard .cardSide{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
@@ -1341,7 +1341,7 @@ const HAS3D=!!window.THREE;
 const SZ=2.4;
 let arenaGround,PROPS={},boom,timeScale=1,renderer,scene,camera,hemi,clock,ranchEnv,arenaEnv,clouds=[],PC=null,EC=null,TMP=null,mode='none',viewEl=null,camZoom=1,hitStop=0,onTap=null;
 const CRE={};
-const cam={fx:0,tfx:0,z:1,tz:1,shake:0};
+const cam={fx:0,tfx:0,z:1,tz:1,shake:0,yaw:0,roll:0};
 const tweens=[],parts=[],rings=[],grads={};
 const closeup=()=>mode==='card'||mode==='home'||mode==='draw';
 function tween(ms,fn){return new Promise(res=>tweens.push({t:0,ms,fn,res}))}
@@ -1452,6 +1452,7 @@ function init3D(){
   tp.delete(e.pointerId);sx=null;down=null}));
  el.addEventListener('wheel',e=>{if(!closeup()||mode==='draw')return;e.preventDefault();camZoom=zc(camZoom*(e.deltaY<0?1.1:1/1.1))},{passive:false});
  ['cardView','homeView','arenaView','drawView','d3View'].forEach(id=>new ResizeObserver(fit).observe($(id)));
+ new ResizeObserver(()=>{if(!$('sDraw3d').hidden)edResize()}).observe($('d3View'));
  requestAnimationFrame(loop);
 }
 function fit(){if(!viewEl)return;const w=viewEl.clientWidth,h=viewEl.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}
@@ -1647,12 +1648,19 @@ function loop(){
  });
  if(mode==='card'||mode==='draw'){if(TMP)TMP.baseRY+=real*.7;const k=1/camZoom;camera.position.set(0,1.1+.6*k,5*k);camera.lookAt(0,1.1,0)}
  else if(mode==='draw3d'){ED.yaw+=(ED.Y-ED.yaw)*Math.min(1,real*8);ED.pitch+=(ED.P-ED.pitch)*Math.min(1,real*8);const cp=Math.cos(ED.pitch);
-  camera.position.set(Math.sin(ED.yaw)*cp*ED.dist,ED.ty+Math.sin(ED.pitch)*ED.dist,Math.cos(ED.yaw)*cp*ED.dist);camera.lookAt(0,ED.ty,0)}
+  camera.position.set(Math.sin(ED.yaw)*cp*ED.dist,ED.ty+Math.sin(ED.pitch)*ED.dist,Math.cos(ED.yaw)*cp*ED.dist);camera.lookAt(0,ED.ty,0);
+  // むきの なまえは がめんの はしに かならず はいる きょりに おく
+  if(ED.labs){const hw=ED.dist*Math.tan(camera.fov*Math.PI/360)*Math.min(1,camera.aspect),r=clamp(hw*.8,1.9,4.2);ED.labs.forEach(([sp,x,z])=>sp.position.set(x*r,.25,z*r))}}
  else if(mode==='home'){const k=1/camZoom;camera.position.set(Math.sin(t*.15)*.4,1.4+3.6*k,1.3+7.6*k);camera.lookAt(0,.9+.4*(1-k),1.3-3.4*k)}
  else{
   cam.fx+=(cam.tfx-cam.fx)*Math.min(1,real*4);cam.z+=(cam.tz-cam.z)*Math.min(1,real*4);cam.shake*=Math.exp(-real*9);
   const s=cam.shake,dist=7.4/cam.z;
-  camera.position.set(cam.fx*.85+Math.sin(t*.25)*.6+(Math.random()-.5)*s,1+1.4/cam.z+(Math.random()-.5)*s,dist);camera.lookAt(cam.fx,1.05,0);
+  // カメラは とまらない：まって いるときは ゆっくり まわりこみ、わざの ときは うつ がわへ まわる
+  const ty=Math.abs(cam.tfx)>.3?clamp(cam.tfx*.5,-.62,.62):Math.sin(t*.16)*.42+Math.sin(t*.07)*.12;
+  cam.yaw+=(ty-cam.yaw)*Math.min(1,real*(Math.abs(cam.tfx)>.3?3:1.2));
+  const hy=1+1.4/cam.z+Math.sin(t*.21)*.25;
+  camera.position.set(cam.fx*.6+Math.sin(cam.yaw)*dist+(Math.random()-.5)*s,hy+(Math.random()-.5)*s,Math.cos(cam.yaw)*dist);camera.lookAt(cam.fx,1.05,0);
+  cam.roll+=((Math.random()-.5)*s*.12-cam.roll)*Math.min(1,real*12);camera.rotateZ(Math.sin(t*.3)*.015+cam.roll);
  }
  renderer.render(scene,camera);
 }
@@ -2255,9 +2263,10 @@ function edEnsure(){
  const disc=new THREE.Mesh(new THREE.CircleGeometry(5,48),new THREE.MeshStandardMaterial({color:'#f3ecdc',roughness:1}));disc.rotation.x=-Math.PI/2;disc.receiveShadow=true;env.add(disc);
  const line=(a,b,col)=>new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(a),V3(b)]),new THREE.LineBasicMaterial({color:col}));
  env.add(line([-5,.01,0],[5,.01,0],0xe0452f),line([0,.01,-5],[0,.01,5],0x2f6fd6),line([0,0,0],[0,4.6,0],0x3a9e4b));
- const lab=(t,col,pos)=>{const c=newCanvas(64),g=c.getContext('2d');g.fillStyle=col;g.font='900 34px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(t,32,34);
-  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));s.scale.setScalar(.55);s.position.copy(V3(pos));return s};
- env.add(lab('まえ','#2f6fd6',[0,.3,4.6]),lab('うしろ','#2f6fd6',[0,.3,-4.6]),lab('みぎ','#e0452f',[4.6,.3,0]),lab('ひだり','#e0452f',[-4.6,.3,0]));
+ const lab=(t,col,pos)=>{const c=newCanvas(160,64),g=c.getContext('2d');g.font='900 40px sans-serif';g.textAlign='center';g.textBaseline='middle';
+  g.lineWidth=8;g.strokeStyle='#ffffff';g.lineJoin='round';g.strokeText(t,80,34);g.fillStyle=col;g.fillText(t,80,34);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c)}));s.scale.set(1.1,.44,1);s.position.copy(V3(pos));return s};
+ ED.labs=[[lab('まえ','#2f6fd6',[0,.25,3.4]),0,1],[lab('うしろ','#2f6fd6',[0,.25,-3.4]),0,-1],[lab('みぎ','#e0452f',[3.4,.25,0]),1,0],[lab('ひだり','#e0452f',[-3.4,.25,0]),-1,0]];ED.labs.forEach(l=>env.add(l[0]));
  ED.env=env;scene.add(env);env.visible=false;ED.group.visible=false;
 }
 function edBuild(pt){
