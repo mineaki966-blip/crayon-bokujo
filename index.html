@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -319,6 +319,29 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
 .mapTop .ttl{white-space:nowrap;font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .stage{font-size:16px}
 #stg{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stamps{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:#efe9da;border:2px solid var(--ink);border-radius:14px;padding:6px}
+.stp{padding:3px 0 2px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:9.5px;font-weight:900;border-width:2px;border-radius:10px;box-shadow:1px 1px 0 var(--ink);min-width:0;white-space:nowrap}
+.stp img{width:34px;height:34px}
+.drawView{position:absolute;width:34%;aspect-ratio:1/1;border:2.5px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--sky);box-shadow:2px 2px 0 var(--ink);z-index:3;cursor:pointer;touch-action:manipulation}
+.drawView[data-c="tr"]{top:8px;right:8px}.drawView[data-c="br"]{bottom:8px;right:8px}.drawView[data-c="bl"]{bottom:8px;left:8px}.drawView[data-c="tl"]{top:8px;left:8px}
+.drawView canvas{pointer-events:none}
+.drawView span{position:absolute;left:6px;top:4px;font-size:10px;font-weight:900;background:#fffdf6;border:1.5px solid var(--ink);border-radius:6px;padding:0 4px;z-index:1;pointer-events:none}
+.nmrow{display:flex;gap:8px}.nmrow input{flex:1;min-width:0}
+.shin ul{margin:6px 0 0;padding-left:1.2em;display:grid;gap:4px;font-size:13px;font-weight:700;line-height:1.5}
+.shin li b{color:var(--red)}
+.tbtn:disabled{opacity:.35}
+.tbtn span{white-space:nowrap;letter-spacing:-.05em;font-size:9.5px}
+.choice{display:grid;gap:6px;text-align:left;padding:16px 18px;border-width:3px;border-radius:18px;box-shadow:4px 4px 0 var(--ink)}
+.choice b{font-family:var(--f-display);font-weight:400;font-size:26px}
+.choice small{font-size:13px;color:var(--soft);line-height:1.6}
+.choice.c3d{background:#d6e6ff}
+.d3view{position:relative;width:100%;aspect-ratio:1/1;max-width:100%;border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:#f6f1e6;box-shadow:4px 4px 0 var(--shadow);touch-action:none}
+.d3view>canvas:first-child{display:block;width:100%;height:100%}
+#d3Ink{position:absolute;inset:0;width:100%;height:100%;z-index:2;touch-action:none;cursor:crosshair}
+.xh{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.18;background:linear-gradient(var(--ink),var(--ink)) center/1.5px 100% no-repeat,linear-gradient(var(--ink),var(--ink)) center/100% 1.5px no-repeat}
+.d3hint{position:absolute;left:8px;right:8px;bottom:8px;z-index:3;pointer-events:none;font-size:12px;font-weight:900;text-align:center;background:#fffdf6e6;border:2px solid var(--ink);border-radius:10px;padding:4px 8px;line-height:1.4}
+.rotrow{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.rbt{font-size:13px;padding:8px 0;box-shadow:2px 2px 0 var(--ink);min-width:0;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -407,17 +430,39 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
     <p class="note">ぼくじょうで ほかの こを タップしても こうたい できるよ。「わかれる」は 2かい おすと けせるよ。</p>
   </section>
 
+  <!-- かきかたを えらぶ -->
+  <section id="sChoose" class="screen" hidden>
+    <button class="back" id="chBack">← ぼくじょう</button>
+    <div class="ttl" style="font-size:22px">どうやって かく？</div>
+    <button class="choice" id="chEasy"><b>かんたん</b><small>まえと うしろの えを 2まい かく。じどうで うで・あし・つのを みつけて りったいに するよ</small></button>
+    <button class="choice c3d" id="ch3d"><b>くるくる3D</b><small>りったいを まわしながら パーツを かきたす。よこから はな、うしろから しっぽ…と じゆうに つくれるよ</small></button>
+  </section>
+
+  <!-- くるくる3D -->
+  <section id="sDraw3d" class="screen" hidden>
+    <div class="mapTop"><button class="back" id="d3Back">← ぼくじょう</button><div class="ttl">くるくる3D</div><span></span></div>
+    <div class="d3view" id="d3View"><canvas id="d3Ink"></canvas><div class="xh" aria-hidden="true"></div><div class="d3hint" id="d3Hint"></div></div>
+    <div class="rotrow" id="d3Rot"></div>
+    <div class="tb" id="d3Tools"></div>
+    <div class="stamps" id="d3Stamps" hidden></div>
+    <div class="pal" id="d3Pal" role="group" aria-label="クレヨンの いろ"></div>
+    <p class="phint" id="d3Msg"></p>
+    <div class="nmrow"><input type="text" id="d3Name" maxlength="10" placeholder="なまえ" aria-label="モンスターのなまえ"><button class="small" id="d3NmAuto">おまかせ なまえ</button></div>
+    <button class="big" id="d3Done">できた！</button>
+  </section>
+
   <!-- 描く -->
   <section id="sDraw" class="screen" hidden>
     <button class="back" id="dBack">← ぼくじょう</button>
     <div class="sideTabs" id="sideTabs"><button data-side="front">まえ<small id="fState"></small></button><button data-side="back">うしろ<small id="bState"></small></button></div>
-    <div class="pad" id="pad"><div id="stack"></div><div class="hint" id="hint"></div></div>
+    <div class="pad" id="pad"><div id="stack"></div><div class="hint" id="hint"></div><div class="drawView" id="drawView" data-c="tr" title="タップで いちを かえる" hidden><span>3D</span></div></div>
     <p class="phint" id="phint"></p>
     <div class="pal" id="tools" role="group" aria-label="クレヨンの いろ"></div>
     <div class="tb" id="tools2"></div>
+    <div class="stamps" id="stamps" hidden></div>
     <div class="tb" id="tools3" hidden></div>
     <div class="legend" id="legend"></div>
-    <input type="text" id="nm" maxlength="10" placeholder="なまえ" value="ラクガキング" aria-label="モンスターのなまえ">
+    <div class="nmrow"><input type="text" id="nm" maxlength="10" placeholder="なまえ" value="" aria-label="モンスターのなまえ"><button class="small" id="nmAuto">おまかせ なまえ</button></div>
     <p class="msg" id="dmsg"></p>
     <button class="big" id="go">いのちを ふきこむ！</button>
     <p class="note">のうりょくは「まえ」の えで きまるよ。からだから ほそく のばした ところが、じどうで うで・あし・つのに なる。</p>
@@ -438,10 +483,11 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
       <div class="plist">
         <div class="ttl">みつけた パーツ</div>
         <div class="chips" id="chips"></div>
-        <div class="note">ちがっていたら、そのパーツを タップ。うで → あし → つの → うごかない の じゅんに かわるよ。</div>
+        <div class="note">ちがっていたら、そのパーツを タップ。うで → あし → つの → はね → しっぽ → うごかない の じゅんに かわるよ。</div>
       </div>
     </div>
     <div class="box"><div class="stats" id="cStats"></div></div>
+    <div class="box shin"><div class="ttl">らくがき しんだん</div><ul id="cTraits"></ul></div>
     <p class="msg" id="cmsg"></p>
     <div class="row"><button id="redraw">かきなおす</button><button class="big" id="decide">このこに けってい！</button></div>
   </section>
@@ -506,8 +552,8 @@ const MAGIC={r:'ファイアボール',b:'アクアスパイラル',g:'リーフ
 const HANDS={g:{n:'グー',m:'ばくれつパンチ'},c:{n:'チョキ',m:'れんぞくスラッシュ'},p:{n:'パー',m:'まほう'}};
 const WINS={g:'c',c:'p',p:'g'},GMAX=4;
 const ECOL={r:['#ff5a2a','#ffb03a','#ffe27a'],b:['#2f7bff','#7fd0ff','#e8f8ff'],g:['#34c34a','#a6f06a','#eaffb0'],y:['#ffd400','#fff38a','#ffffff'],k:['#9b4dff','#e070ff','#5a2bd0']};
-const PT={arm:{n:'うで',c:'#ff8a2a'},leg:{n:'あし',c:'#2f6fd6'},horn:{n:'つの',c:'#9b59d0'},none:{n:'うごかない',c:'#a39b8f'}};
-const CYCLE=['arm','leg','horn','none'];
+const PT={arm:{n:'うで',c:'#ff8a2a'},leg:{n:'あし',c:'#2f6fd6'},horn:{n:'つの',c:'#9b59d0'},wing:{n:'はね',c:'#1fb5d6'},tail:{n:'しっぽ',c:'#b5832f'},none:{n:'うごかない',c:'#a39b8f'}};
+const CYCLE=['arm','leg','horn','wing','tail','none'];
 const STYLE_NOTE={none:'かいた まんまの あじを だいじに するよ。',cute:'パステルいろ・ほそい ふちどり・ぷっくり。めに ひかりと ほっぺを たして、ぴょんぴょん はねるよ。',cool:'こい いろ・ふとい ふちどり・くっきり かげ。きりっと まゆげを たして、まえのめりに かまえるよ。'};
 const RANKS=['','スーパー','ハイパー','レジェンド'];
 const SPCOST=3,MAXMON=6;
@@ -525,7 +571,7 @@ function inkOf(c){const d=c.getContext('2d').getImageData(0,0,640,640).data;for(
 const SAVE_KEY='crayon-save-v2';
 let save={mons:[],cur:null,coins:30};
 try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));if(s&&Array.isArray(s.mons))save=s}catch(e){}
-if(!Array.isArray(save.prog))save.prog=[0,0,0,0,0];if(!save.seen)save.seen={};save.muted=!!save.muted;
+if(!Array.isArray(save.prog))save.prog=[0,0,0,0,0];if(save.preview3d===undefined)save.preview3d=true;if(!save.seen)save.seen={};save.muted=!!save.muted;
 function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));return true}catch(e){return false}}
 const curMon=()=>save.mons.find(m=>m.id===save.cur);
 /* ================= おと（BGM・こうかおん：その場で 合成） ================= */
@@ -665,14 +711,15 @@ const fullName=m=>(RANKS[rankOf(m.lv)]?RANKS[rankOf(m.lv)]+' ':'')+m.name;
 
 /* ================= 2D 描画（まえ／うしろ） ================= */
 const stack=$('stack'),pad=$('pad');
-const cvF=newCanvas(640),guide=newCanvas(640),cvB=newCanvas(640);
-[cvF,guide,cvB].forEach(c=>{c.className='layer';stack.appendChild(c)});
-const ctxF=cvF.getContext('2d'),ctxB=cvB.getContext('2d');[ctxF,ctxB].forEach(g=>g.lineCap=g.lineJoin='round');
-let side='front',ctx=ctxF,silMir=null,silData=null,undoF=[],undoB=[],undo=undoF,askedBack=false;
-let cur=PAL[0],size=22,tool='pen',stab=true,drawing=false,last=null,raw=null;
-const tools=$('tools'),tools2=$('tools2'),tools3=$('tools3');
+const cvF=newCanvas(640),guide=newCanvas(640),cvB=newCanvas(640),ovl=newCanvas(640);
+[cvF,guide,cvB,ovl].forEach(c=>{c.className='layer';stack.appendChild(c)});
+const ctxF=cvF.getContext('2d'),ctxB=cvB.getContext('2d'),og=ovl.getContext('2d');[ctxF,ctxB].forEach(g=>g.lineCap=g.lineJoin='round');
+let side='front',ctx=ctxF,silMir=null,silData=null,undoF=[],undoB=[],redoF=[],redoB=[],undo=undoF,redo=redoF,askedBack=false;
+let cur=PAL[0],size=22,tool='pen',stamp='circle',stab=true,mirrorOn=false,dotOn=false,drawing=false,last=null,raw=null,shapeA=null,shapeB=null;
+const DOT=20; // ドットモードの 1マス（32×32マス）
+const tools=$('tools'),tools2=$('tools2'),tools3=$('tools3'),stampsBox=$('stamps');
 PAL.forEach((c,i)=>{const b=document.createElement('button');b.className='crayon';b.style.background=c.hex;
- b.setAttribute('aria-label',c.name);b.title=c.name;b.onclick=()=>{cur=c;if(tool==='eraser')tool='pen';sync()};b.dataset.i=i;tools.appendChild(b)});
+ b.setAttribute('aria-label',c.name);b.title=c.name;b.onclick=()=>{cur=c;if(tool==='eraser'||tool==='spoit')tool='pen';sync()};b.dataset.i=i;tools.appendChild(b)});
 $('legend').innerHTML=[['r','こうげき','ほのお'],['b','ぼうぎょ','みず'],['g','たいりょく','くさ'],['y','すばやさ','かみなり'],['k','バランス','むぞくせい']]
  .map(([g,a,e])=>`<div><div class="sw">${PAL.filter(c=>c.g===g).map(c=>`<i style="background:${c.hex}"></i>`).join('')}</div>${a}<br>${e}</div>`).join('');
 const K='#2b2622',SV=(d)=>`<svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="${K}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -680,38 +727,99 @@ const ICON={
  pen:c=>SV(`<path d="M6 26l2.5-7.5L21 6l5 5L13.5 23.5z" fill="${c}"/><path d="M6 26l2.5-7.5 5 5z" fill="#fbf8ef"/><path d="M18 9l5 5"/>`),
  fill:c=>SV(`<path d="M5 14l9-9 10 10-9 9z" fill="#fbf8ef"/><path d="M5 14h19" /><path d="M5 14l10 10 9-9" fill="${c}"/><path d="M27 18c0 3 2 4 2 6a2 2 0 01-4 0c0-2 2-3 2-6z" fill="${c}"/>`),
  eraser:()=>SV(`<path d="M4 20l11-11 9 9-7 7H9z" fill="#ffc2d4"/><path d="M9 25l6-6" /><path d="M10 26h18"/>`),
+ stamp:c=>SV(`<rect x="9" y="3" width="14" height="10" rx="4" fill="#fbf8ef"/><path d="M16 13v5"/><rect x="5" y="18" width="22" height="6" rx="2" fill="${c}"/><path d="M5 28h22"/>`),
+ spoit:c=>SV(`<path d="M20 4l8 8-3 3-8-8z" fill="#fbf8ef"/><path d="M18 10L7 21l-1 5 5-1 11-11" fill="${c}"/><path d="M15 7l10 10"/>`),
  undo:()=>SV(`<path d="M11 8L5 14l6 6"/><path d="M5 14h13a8 8 0 010 16h-3"/>`),
+ redo:()=>SV(`<path d="M21 8l6 6-6 6"/><path d="M27 14H14a8 8 0 000 16h3"/>`),
  trash:()=>SV(`<path d="M6 9h20M12 9V5h8v4M8 9l2 18h12l2-18" fill="#fbf8ef"/><path d="M14 14v8M18 14v8"/>`),
  stab:()=>SV(`<path d="M3 20c4-10 7-10 10 0s6 10 10 0 4-6 6-4"/>`),
  zoom:()=>SV(`<circle cx="13" cy="13" r="8" fill="#fbf8ef"/><path d="M19 19l8 8"/><path d="M10 13h6"/>`),
+ mirror:()=>SV(`<path d="M16 3v26" stroke-dasharray="3 3"/><path d="M13 8L4 24h9z" fill="#ffc2d4"/><path d="M19 8l9 16h-9z" fill="#d6e6ff"/>`),
+ dot:()=>SV(`<rect x="4" y="4" width="8" height="8" fill="#e0452f"/><rect x="12" y="12" width="8" height="8" fill="#f2b705"/><rect x="20" y="4" width="8" height="8" fill="#2f6fd6"/><rect x="4" y="20" width="8" height="8" fill="#3a9e4b"/><rect x="20" y="20" width="8" height="8" fill="#2b2622"/>`),
+ cube:()=>SV(`<path d="M16 3l11 6v14l-11 6-11-6V9z" fill="#d6e6ff"/><path d="M5 9l11 6 11-6M16 15v14"/>`),
  auto:()=>SV(`<path d="M16 3l3 7 7 1-5 5 2 8-7-4-7 4 2-8-5-5 7-1z" fill="#f2b705"/>`),
  copy:()=>SV(`<rect x="4" y="4" width="16" height="16" rx="3" fill="#fbf8ef"/><rect x="12" y="12" width="16" height="16" rx="3" fill="#d6e6ff"/>`),
  size:(c,r)=>SV(`<circle cx="16" cy="16" r="${r}" fill="${c}" stroke-width="2"/>`)};
 function tbtn(par,label,icon,fn,cls){const b=document.createElement('button');b.className='tbtn'+(cls?' '+cls:'');b.innerHTML=icon+`<span>${label}</span>`;b.onclick=fn;b.setAttribute('aria-label',label);par.appendChild(b);return b}
 function grp(par){const g=document.createElement('div');g.className='tgrp';par.appendChild(g);return g}
-const g1=grp(tools2),g2=grp(tools2);
+function setIcon(b,svg){const o=b.querySelector('svg');if(o)o.outerHTML=svg;else b.insertAdjacentHTML('afterbegin',svg)}
+const g1=grp(tools2);
 const bPen=tbtn(g1,'ペン','',()=>{tool='pen';sync()});
 const bFill=tbtn(g1,'ぬる','',()=>{tool='fill';sync()});
+const bStamp=tbtn(g1,'スタンプ','',()=>{tool='shape';sync()});
+const bSpoit=tbtn(g1,'スポイト','',()=>{tool='spoit';sync()});
 const bEr=tbtn(g1,'けす',ICON.eraser(),()=>{tool='eraser';sync()});
+const row2=document.createElement('div');row2.className='tb';row2.style.width='100%';tools2.appendChild(row2);
+const g2=grp(row2),g3=grp(row2);
 const SIZES=[[12,'ほそ',4],[22,'ふつう',7],[38,'ふと',11]],bSz=SIZES.map(([v,l,r])=>{const b=tbtn(g2,l,'',()=>{size=v;sync()});b.dataset.v=v;b.dataset.r=r;return b});
+const bMir=tbtn(g3,'たいしょう',ICON.mirror(),()=>{mirrorOn=!mirrorOn;sync();drawOverlay()});
+const bDot=tbtn(g3,'ドット',ICON.dot(),()=>{dotOn=!dotOn;sync();drawOverlay()});
 const tbr=document.createElement('div');tbr.className='tb';tbr.style.width='100%';tools2.appendChild(tbr);
-tbtn(tbr,'もどす',ICON.undo(),()=>{const u=undo.pop();if(u){ctx.putImageData(u,0,0);afterEdit()}});
+const bUndo=tbtn(tbr,'もどす',ICON.undo(),()=>doUndo());
+const bRedo=tbtn(tbr,'やりなおす',ICON.redo(),()=>doRedo());
 const bStab=tbtn(tbr,'てぶれ',ICON.stab(),()=>{stab=!stab;sync()});
 const bZoom=tbtn(tbr,'×1.0',ICON.zoom(),()=>setView(1,0,0));
+const b3d=tbtn(tbr,'3D',ICON.cube(),()=>{save.preview3d=!save.preview3d;persist();sync();applyPreview()});
 const sp=document.createElement('span');sp.className='tsep';tbr.appendChild(sp);
 const bClr=tbtn(tbr,'ぜんぶけす',ICON.trash(),()=>{if(!bClr.dataset.ok){bClr.dataset.ok=1;bClr.querySelector('span').textContent='ほんとに？';bClr.style.background='#ffe1e1';setTimeout(()=>{delete bClr.dataset.ok;bClr.querySelector('span').textContent='ぜんぶけす';bClr.style.background=''},2500);return}
  delete bClr.dataset.ok;bClr.querySelector('span').textContent='ぜんぶけす';bClr.style.background='';snap();ctx.clearRect(0,0,640,640);afterEdit()});
 tbtn(tools3,'おまかせで ぬる',ICON.auto(),()=>{snap();ctxB.clearRect(0,0,640,640);ctxB.drawImage(mirror(autoBack(cvF,detectParts(cvF))),0,0);clipBack();afterEdit()},'wide');
 tbtn(tools3,'まえを うつす',ICON.copy(),()=>{snap();ctxB.clearRect(0,0,640,640);ctxB.drawImage(silMir,0,0);afterEdit()},'wide');
+
+/* --- スタンプ（かたち・かおパーツ） --- */
+const STAMPS=[['circle','まる'],['rect','しかく'],['tri','さんかく'],['star','ほし'],['heart','ハート'],['eyes','め 2こ'],['eye','め'],['kira','キラめ'],['angry','おこりめ'],['smile','にこくち'],['fang','キバくち'],['open','あーん']];
+function drawStamp(g,kind,x0,y0,x1,y1,col){
+ const X=Math.min(x0,x1),Y=Math.min(y0,y1),w=Math.max(8,Math.abs(x1-x0)),h=Math.max(8,Math.abs(y1-y0)),cx=X+w/2,cy=Y+h/2,lw=clamp(Math.min(w,h)*.07,4,12);
+ g.save();g.lineCap=g.lineJoin='round';g.strokeStyle=K;g.lineWidth=lw;g.fillStyle=col;
+ const fs=()=>{g.fill();g.stroke()};
+ const eye=(ex,ey,rx,ry,type)=>{g.fillStyle='#fff';g.lineWidth=clamp(Math.min(rx,ry)*.22,3,9);g.beginPath();g.ellipse(ex,ey,rx,ry,0,0,7);g.fill();g.stroke();
+  const pr=Math.min(rx,ry)*(type==='kira'?.72:.5);
+  if(type==='kira'){g.fillStyle=col;g.beginPath();g.ellipse(ex,ey+ry*.08,pr,pr*1.12,0,0,7);g.fill();g.fillStyle=K;g.beginPath();g.arc(ex,ey+ry*.1,pr*.5,0,7);g.fill();
+   g.fillStyle='#fff';g.beginPath();g.arc(ex-pr*.35,ey-pr*.35,pr*.32,0,7);g.fill();g.beginPath();g.arc(ex+pr*.32,ey+pr*.4,pr*.15,0,7);g.fill()}
+  else{g.fillStyle=K;g.beginPath();g.arc(ex,ey+ry*.12,pr,0,7);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(ex-pr*.35,ey-pr*.2,pr*.3,0,7);g.fill()}
+  if(type==='angry'){g.strokeStyle=K;g.lineWidth=clamp(ry*.35,4,14);g.beginPath();g.moveTo(ex-rx*1.1,ey-ry*1.25);g.lineTo(ex+rx*.9,ey-ry*.55);g.stroke()}};
+ if(kind==='circle'){g.beginPath();g.ellipse(cx,cy,w/2,h/2,0,0,7);fs()}
+ else if(kind==='rect'){const r=Math.min(w,h)*.18;g.beginPath();g.moveTo(X+r,Y);g.arcTo(X+w,Y,X+w,Y+h,r);g.arcTo(X+w,Y+h,X,Y+h,r);g.arcTo(X,Y+h,X,Y,r);g.arcTo(X,Y,X+w,Y,r);g.closePath();fs()}
+ else if(kind==='tri'){g.beginPath();g.moveTo(cx,Y);g.lineTo(X+w,Y+h);g.lineTo(X,Y+h);g.closePath();fs()}
+ else if(kind==='star'){g.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?.42:1;const px=cx+Math.cos(a)*w/2*r,py=cy+Math.sin(a)*h/2*r+h*.06;i?g.lineTo(px,py):g.moveTo(px,py)}g.closePath();fs()}
+ else if(kind==='heart'){g.beginPath();g.moveTo(cx,Y+h*.95);g.bezierCurveTo(X-w*.05,Y+h*.55,X+w*.05,Y-h*.05,cx,Y+h*.28);g.bezierCurveTo(X+w*.95,Y-h*.05,X+w*1.05,Y+h*.55,cx,Y+h*.95);g.closePath();fs()}
+ else if(kind==='eyes'){const rx=w*.2,ry=h*.42;eye(X+w*.25,cy,rx,ry,'eye');eye(X+w*.75,cy,rx,ry,'eye')}
+ else if(kind==='eye'||kind==='kira'||kind==='angry')eye(cx,cy+(kind==='angry'?h*.12:0),w*.45,(kind==='angry'?h*.34:h*.45),kind);
+ else if(kind==='smile'){g.lineWidth=clamp(h*.16,5,14);g.beginPath();g.moveTo(X,Y+h*.2);g.quadraticCurveTo(cx,Y+h*1.15,X+w,Y+h*.2);g.stroke()}
+ else if(kind==='fang'){g.lineWidth=clamp(h*.12,4,12);g.fillStyle='#fff';[.3,.7].forEach(t=>{g.beginPath();g.moveTo(X+w*t-w*.09,Y+h*.3);g.lineTo(X+w*t,Y+h*.95);g.lineTo(X+w*t+w*.09,Y+h*.3);g.closePath();g.fill();g.lineWidth=clamp(h*.07,3,8);g.stroke()});
+  g.lineWidth=clamp(h*.12,4,12);g.beginPath();g.moveTo(X,Y+h*.3);g.quadraticCurveTo(cx,Y+h*.45,X+w,Y+h*.3);g.stroke()}
+ else if(kind==='open'){g.fillStyle='#5a1f1f';g.beginPath();g.ellipse(cx,cy,w/2,h/2,0,0,7);g.fill();g.save();g.clip();g.fillStyle='#ff6f86';g.beginPath();g.ellipse(cx,Y+h*1.02,w*.32,h*.36,0,0,7);g.fill();g.restore();g.lineWidth=clamp(h*.1,4,10);g.beginPath();g.ellipse(cx,cy,w/2,h/2,0,0,7);g.stroke()}
+ g.restore();
+}
+function stampIcon(kind){const c=newCanvas(64),g=c.getContext('2d');const pad={eyes:[6,18,58,46],smile:[10,18,54,44],fang:[8,16,56,46],open:[12,14,52,50]}[kind]||[10,10,54,54];
+ drawStamp(g,kind,pad[0],pad[1],pad[2],pad[3],cur.hex);return c.toDataURL()}
+STAMPS.forEach(([k,l])=>{const b=document.createElement('button');b.className='stp';b.dataset.k=k;b.innerHTML=`<img alt="" src=""><span>${l}</span>`;b.onclick=()=>{stamp=k;tool='shape';sync()};stampsBox.appendChild(b)});
+const DEF_SIZE={eyes:[150,64],eye:[64,70],kira:[70,76],angry:[70,64],smile:[90,44],fang:[96,46],open:[70,56]};
+
 function sync(){
  tools.querySelectorAll('.crayon').forEach(b=>b.setAttribute('aria-pressed',tool!=='eraser'&&PAL[b.dataset.i]===cur));
- if(bPen.querySelector('svg'))bPen.querySelector('svg').outerHTML=ICON.pen(cur.hex);else bPen.insertAdjacentHTML('afterbegin',ICON.pen(cur.hex));
- if(bFill.querySelector('svg'))bFill.querySelector('svg').outerHTML=ICON.fill(cur.hex);else bFill.insertAdjacentHTML('afterbegin',ICON.fill(cur.hex));
- [[bPen,'pen'],[bFill,'fill'],[bEr,'eraser']].forEach(([b,t])=>b.setAttribute('aria-pressed',tool===t));
- bSz.forEach(b=>{const svg=ICON.size(tool==='eraser'?'#ffc2d4':cur.hex,b.dataset.r);if(b.querySelector('svg'))b.querySelector('svg').outerHTML=svg;else b.insertAdjacentHTML('afterbegin',svg);
-  b.setAttribute('aria-pressed',+b.dataset.v===size);b.disabled=tool==='fill'});
- bStab.setAttribute('aria-pressed',stab);bStab.querySelector('span').textContent=stab?'てぶれ ON':'てぶれ OFF';
- stack.style.cursor=tool==='fill'?'cell':'crosshair';
+ setIcon(bPen,ICON.pen(cur.hex));setIcon(bFill,ICON.fill(cur.hex));setIcon(bStamp,ICON.stamp(cur.hex));setIcon(bSpoit,ICON.spoit(cur.hex));
+ [[bPen,'pen'],[bFill,'fill'],[bStamp,'shape'],[bSpoit,'spoit'],[bEr,'eraser']].forEach(([b,t])=>b.setAttribute('aria-pressed',tool===t));
+ bSz.forEach(b=>{setIcon(b,ICON.size(tool==='eraser'?'#ffc2d4':cur.hex,b.dataset.r));b.setAttribute('aria-pressed',+b.dataset.v===size);b.disabled=tool==='fill'||tool==='shape'||tool==='spoit'});
+ bMir.setAttribute('aria-pressed',mirrorOn);bDot.setAttribute('aria-pressed',dotOn);
+ bStab.setAttribute('aria-pressed',stab);bStab.querySelector('span').textContent=stab?'てぶれ ON':'てぶれ OFF';bStab.disabled=dotOn;
+ b3d.setAttribute('aria-pressed',!!save.preview3d);
+ bUndo.disabled=!undo.length;bRedo.disabled=!redo.length;
+ stampsBox.hidden=tool!=='shape';
+ if(tool==='shape')stampsBox.querySelectorAll('.stp').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.k===stamp);const im=b.querySelector('img');const k=b.dataset.k+cur.hex;if(im.dataset.k!==k){im.src=stampIcon(b.dataset.k);im.dataset.k=k}});
+ stack.style.cursor=tool==='fill'?'cell':tool==='spoit'?'copy':'crosshair';
+ $('phint').textContent=tool==='shape'?'ひっぱると おおきさが かわるよ。タップだけなら ふつうの おおきさ':tool==='spoit'?'えの いろを タッチすると その いろの クレヨンに なるよ':sideHint();
+}
+function sideHint(){return side==='front'?'まえすがたを かこう。のうりょくも この えで きまるよ（2本指タップで もどす）':'うしろすがたを かこう（みぎと ひだりが はんたい）。かかなければ おまかせで ぬるよ'}
+function drawOverlay(){
+ og.clearRect(0,0,640,640);
+ if(dotOn){og.strokeStyle='rgba(47,111,214,.16)';og.lineWidth=1;og.beginPath();for(let i=DOT;i<640;i+=DOT){og.moveTo(i+.5,0);og.lineTo(i+.5,640);og.moveTo(0,i+.5);og.lineTo(640,i+.5)}og.stroke()}
+ if(mirrorOn){og.save();og.strokeStyle='rgba(224,69,47,.55)';og.lineWidth=3;og.setLineDash([12,10]);og.beginPath();og.moveTo(320,0);og.lineTo(320,640);og.stroke();og.restore()}
+ if(shapeA&&shapeB){const [a,b]=shapeBox();og.globalAlpha=.75;drawStamp(og,stamp,a.x,a.y,b.x,b.y,cur.hex);if(mirrorOn)drawStamp(og,stamp,640-a.x,a.y,640-b.x,b.y,cur.hex);og.globalAlpha=1}
+}
+function shapeBox(){
+ let a=shapeA,b=shapeB;if(Math.hypot(b.x-a.x,b.y-a.y)<14){const d=DEF_SIZE[stamp]||[size*4.5,size*4.5];return[{x:a.x-d[0]/2,y:a.y-d[1]/2},{x:a.x+d[0]/2,y:a.y+d[1]/2}]}
+ return[a,b];
 }
 function makeGuide(){
  silMir=mirror(cvF);silData=silMir.getContext('2d').getImageData(0,0,640,640).data;
@@ -722,35 +830,55 @@ function makeGuide(){
 }
 function clipBack(){if(!silMir)return;ctxB.globalCompositeOperation='destination-in';ctxB.drawImage(silMir,0,0);ctxB.globalCompositeOperation='source-over'}
 function setSide(s){
- side=s;ctx=s==='front'?ctxF:ctxB;undo=s==='front'?undoF:undoB;
+ side=s;ctx=s==='front'?ctxF:ctxB;undo=s==='front'?undoF:undoB;redo=s==='front'?redoF:redoB;
  if(s==='back'){makeGuide();clipBack()}
  cvF.style.opacity=s==='front'?1:0;guide.style.opacity=s==='back'?1:0;cvB.style.opacity=s==='back'?1:0;
  $('sideTabs').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.side===s));
  tools3.hidden=s!=='back';
- $('phint').textContent=s==='front'?'まえすがたを かこう。のうりょくも この えで きまるよ':'うしろすがたを かこう（みぎと ひだりが はんたいに なってるよ）。かかなければ おまかせで ぬるよ';
- afterEdit();
+ sync();afterEdit();
 }
 $('sideTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>setSide(b.dataset.side));
-function snap(){undo.push(ctx.getImageData(0,0,640,640));if(undo.length>25)undo.shift()}
+function snap(){undo.push(ctx.getImageData(0,0,640,640));if(undo.length>30)undo.shift();redo.length=0}
+function doUndo(){const u=undo.pop();if(!u)return;redo.push(ctx.getImageData(0,0,640,640));ctx.putImageData(u,0,0);afterEdit();se('tap')}
+function doRedo(){const r=redo.pop();if(!r)return;undo.push(ctx.getImageData(0,0,640,640));ctx.putImageData(r,0,0);afterEdit()}
+let draftT=0,prevT=0;
 function afterEdit(){
  const f=inkOf(cvF),b=inkOf(cvB);
  $('hint').hidden=side==='front'?f:b;$('hint').textContent=side==='front'?'ここに じぶんの モンスターを かこう（2本指で ズーム）':'グレーの ところには かけないよ';
  $('fState').textContent=f?'かいた':'まだ';$('bState').textContent=b?'かいた':'おまかせ';
+ bUndo.disabled=!undo.length;bRedo.disabled=!redo.length;
+ clearTimeout(draftT);draftT=setTimeout(saveDraft,900);
+ clearTimeout(prevT);prevT=setTimeout(updatePreview,650);
 }
+/* したがきの じどう ほぞん */
+const DRAFT_KEY='crayon-draft';
+function saveDraft(){if($('sDraw').hidden)return;try{
+ if(!inkOf(cvF)&&!inkOf(cvB)){localStorage.removeItem(DRAFT_KEY);return}
+ localStorage.setItem(DRAFT_KEY,JSON.stringify({f:cvF.toDataURL('image/png'),b:inkOf(cvB)?cvB.toDataURL('image/png'):null,name:$('nm').value,ed:editing?editing.id:null,t:Date.now()}))}catch(e){}}
+function loadDraft(){try{return JSON.parse(localStorage.getItem(DRAFT_KEY))}catch(e){return null}}
+function clearDraft(){try{localStorage.removeItem(DRAFT_KEY)}catch(e){}}
 function pos(e){const r=stack.getBoundingClientRect();return{x:(e.clientX-r.left)*640/r.width,y:(e.clientY-r.top)*640/r.height}}
-function stroke(a,b){
- const er=tool==='eraser';
+function inBack(x,y){if(side!=='back')return true;const X=Math.floor(x),Y=Math.floor(y);return X>=0&&Y>=0&&X<640&&Y<640&&silData[(Y*640+X)*4+3]>40}
+function strokeLine(a,b,mx){
+ const er=tool==='eraser',fx=p=>mx?{x:640-p.x,y:p.y}:p;a=fx(a);b=fx(b);
  ctx.globalCompositeOperation=er?'destination-out':'source-over';
- ctx.strokeStyle=cur.hex;ctx.lineWidth=er?size*1.6:size;
- ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
- if(!er){ctx.lineWidth=size*.35;ctx.beginPath();ctx.moveTo(a.x+(Math.random()-.5)*size*.5,a.y+(Math.random()-.5)*size*.5);ctx.lineTo(b.x,b.y);ctx.stroke()}
+ if(dotOn){ // ドット：マスを うめる
+  const n=size<=12?1:size<=22?2:3,st=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/(DOT/2)));ctx.fillStyle=cur.hex;
+  for(let i=0;i<=st;i++){const x=a.x+(b.x-a.x)*i/st,y=a.y+(b.y-a.y)*i/st,cx=Math.floor(x/DOT)-Math.floor((n-1)/2),cy=Math.floor(y/DOT)-Math.floor((n-1)/2);
+   for(let j=0;j<n;j++)for(let k=0;k<n;k++){const px=(cx+k)*DOT,py=(cy+j)*DOT;if(er)ctx.clearRect(px,py,DOT,DOT);else ctx.fillRect(px,py,DOT,DOT)}}
+ }else{
+  ctx.strokeStyle=cur.hex;ctx.lineWidth=er?size*1.6:size;
+  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  if(!er){ctx.lineWidth=size*.35;ctx.beginPath();ctx.moveTo(a.x+(Math.random()-.5)*size*.5,a.y+(Math.random()-.5)*size*.5);ctx.lineTo(b.x,b.y);ctx.stroke()}
+ }
  ctx.globalCompositeOperation='source-over';
 }
-function floodFill(p){
- const W=640,x0=Math.floor(p.x),y0=Math.floor(p.y);if(x0<0||y0<0||x0>=W||y0>=W)return;
- const back=side==='back';if(back&&silData[(y0*W+x0)*4+3]<=40)return;
+function stroke(a,b){strokeLine(a,b,false);if(mirrorOn)strokeLine(a,b,true)}
+function floodFill(p,mx){
+ const W=640;if(mx)p={x:640-p.x,y:p.y};const x0=Math.floor(p.x),y0=Math.floor(p.y);if(x0<0||y0<0||x0>=W||y0>=W)return 0;
+ const back=side==='back';if(back&&silData[(y0*W+x0)*4+3]<=40)return 0;
  const img=ctx.getImageData(0,0,W,W),d=img.data,s=(y0*W+x0)*4,sr=d[s],sg=d[s+1],sb=d[s+2],clear=d[s+3]<128,[fr,fg,fb]=cur.rgb;
- if(!clear&&Math.abs(sr-fr)+Math.abs(sg-fg)+Math.abs(sb-fb)<30)return;
+ if(!clear&&Math.abs(sr-fr)+Math.abs(sg-fg)+Math.abs(sb-fb)<30)return 0;
  const match=i=>{if(back&&silData[i+3]<=40)return false;const a=d[i+3];return clear?a<128:a>=128&&Math.abs(d[i]-sr)+Math.abs(d[i+1]-sg)+Math.abs(d[i+2]-sb)<110};
  const mask=new Uint8Array(W*W),st=[y0*W+x0];mask[y0*W+x0]=1;let n=0;
  while(st.length){const q=st.pop();n++;const xx=q%W,yy=(q-xx)/W;
@@ -758,42 +886,73 @@ function floodFill(p){
   if(xx<W-1&&!mask[q+1]&&match((q+1)*4)){mask[q+1]=1;st.push(q+1)}
   if(yy>0&&!mask[q-W]&&match((q-W)*4)){mask[q-W]=1;st.push(q-W)}
   if(yy<W-1&&!mask[q+W]&&match((q+W)*4)){mask[q+W]=1;st.push(q+W)}}
- snap();
  const out=mask.slice();
- for(let yy=0;yy<W;yy++)for(let xx=0;xx<W;xx++){const q=yy*W+xx;if(!mask[q])continue;
+ if(!dotOn)for(let yy=0;yy<W;yy++)for(let xx=0;xx<W;xx++){const q=yy*W+xx;if(!mask[q])continue;
   if((xx>0&&!mask[q-1])||(xx<W-1&&!mask[q+1])||(yy>0&&!mask[q-W])||(yy<W-1&&!mask[q+W]))
    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const a=xx+dx,b=yy+dy;if(a>=0&&b>=0&&a<W&&b<W)out[b*W+a]=1}}
  for(let q=0;q<W*W;q++)if(out[q]){const i=q*4;d[i]=fr;d[i+1]=fg;d[i+2]=fb;d[i+3]=255}
- ctx.putImageData(img,0,0);if(back)clipBack();afterEdit();
- $('dmsg').textContent=!back&&clear&&n>W*W*.6?'すきまから はみだしたかも。「もどす」で もとに もどせるよ':'';
+ ctx.putImageData(img,0,0);return clear?n:0;
 }
-let Z=1,TX=0,TY=0,gest=null,pendingFill=null,strokeSnap=false;const ptrs=new Map();
+function doFill(p){snap();const n=floodFill(p,false);if(mirrorOn)floodFill(p,true);if(side==='back')clipBack();afterEdit();
+ $('dmsg').textContent=side!=='back'&&n>640*640*.6?'すきまから はみだしたかも。「もどす」で もとに もどせるよ':''}
+function doSpoit(p){
+ const X=clamp(Math.floor(p.x),0,639),Y=clamp(Math.floor(p.y),0,639),d=ctx.getImageData(X,Y,1,1).data;
+ if(d[3]<60){$('dmsg').textContent='なにも かいてない ところだよ';return}
+ cur=nearPal(d[0],d[1],d[2]);tool='pen';$('dmsg').textContent=`「${cur.name}」を えらんだよ`;sync();se('good');
+}
+function commitShape(){
+ const [a,b]=shapeBox();snap();drawStamp(ctx,stamp,a.x,a.y,b.x,b.y,cur.hex);
+ if(mirrorOn&&Math.abs((a.x+b.x)/2-320)>8)drawStamp(ctx,stamp,640-a.x,a.y,640-b.x,b.y,cur.hex);
+ if(side==='back')clipBack();shapeA=shapeB=null;drawOverlay();afterEdit();se('tap');
+}
+let Z=1,TX=0,TY=0,gest=null,pendingTap=null,strokeSnap=false,twoTap=null;const ptrs=new Map();
 function setView(z,tx,ty){const W=pad.clientWidth||1;Z=clamp(z,1,5);TX=clamp(tx,W-W*Z,0);TY=clamp(ty,W-W*Z,0);
  stack.style.transform=`translate(${TX}px,${TY}px) scale(${Z})`;bZoom.querySelector('span').textContent='×'+Z.toFixed(1);bZoom.disabled=Z===1}
 function two(){const [a,b]=[...ptrs.values()],r=pad.getBoundingClientRect();return{d:Math.hypot(a.x-b.x,a.y-b.y)||1,mx:(a.x+b.x)/2-r.left,my:(a.y+b.y)/2-r.top}}
 stack.addEventListener('pointerdown',e=>{
- e.preventDefault();stack.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ e.preventDefault();stack.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY});
  if(ptrs.size===2){if(drawing&&strokeSnap){const u=undo.pop();if(u)ctx.putImageData(u,0,0)}
-  drawing=false;strokeSnap=false;pendingFill=null;gest={...two(),z:Z,tx:TX,ty:TY};return}
+  drawing=false;strokeSnap=false;pendingTap=null;shapeA=shapeB=null;drawOverlay();gest={...two(),z:Z,tx:TX,ty:TY};twoTap={t:performance.now(),moved:false};return}
  if(ptrs.size>2||gest)return;
- if(tool==='fill'){pendingFill=pos(e);return}
- snap();strokeSnap=true;drawing=true;last=pos(e);raw=last;stroke(last,last);$('hint').hidden=true;
+ const p=pos(e);
+ if(tool==='fill'||tool==='spoit'){pendingTap=p;return}
+ if(tool==='shape'){shapeA=p;shapeB=p;drawOverlay();return}
+ snap();strokeSnap=true;drawing=true;last=p;raw=last;stroke(last,last);$('hint').hidden=true;
 });
 stack.addEventListener('pointermove',e=>{
- if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
- if(gest&&ptrs.size>=2){const t=two(),z=clamp(gest.z*t.d/gest.d,1,5);setView(z,t.mx-(gest.mx-gest.tx)/gest.z*z,t.my-(gest.my-gest.ty)/gest.z*z);return}
+ if(!ptrs.has(e.pointerId))return;const pp=ptrs.get(e.pointerId);pp.x=e.clientX;pp.y=e.clientY;
+ if(gest&&ptrs.size>=2){if(Math.hypot(pp.x-pp.sx,pp.y-pp.sy)>14&&twoTap)twoTap.moved=true;
+  const t=two(),z=clamp(gest.z*t.d/gest.d,1,5);setView(z,t.mx-(gest.mx-gest.tx)/gest.z*z,t.my-(gest.my-gest.ty)/gest.z*z);return}
+ if(shapeA){shapeB=pos(e);drawOverlay();return}
  if(!drawing)return;raw=pos(e);
- const p=stab?{x:last.x+(raw.x-last.x)*.38,y:last.y+(raw.y-last.y)*.38}:raw;
+ const p=stab&&!dotOn?{x:last.x+(raw.x-last.x)*.38,y:last.y+(raw.y-last.y)*.38}:raw;
  stroke(last,p);last=p;
 });
 ['pointerup','pointercancel'].forEach(t=>stack.addEventListener(t,e=>{
- if(t==='pointerup'&&pendingFill&&!gest)floodFill(pendingFill);
- if(drawing&&stab&&raw&&t==='pointerup')stroke(last,raw);
- const was=drawing;pendingFill=null;ptrs.delete(e.pointerId);if(!ptrs.size)gest=null;
+ if(t==='pointerup'&&pendingTap&&!gest){if(tool==='fill')doFill(pendingTap);else doSpoit(pendingTap)}
+ if(t==='pointerup'&&shapeA&&!gest)commitShape();
+ if(drawing&&stab&&!dotOn&&raw&&t==='pointerup')stroke(last,raw);
+ const was=drawing;pendingTap=null;ptrs.delete(e.pointerId);
+ if(!ptrs.size){if(gest&&twoTap&&!twoTap.moved&&performance.now()-twoTap.t<320)doUndo(); // 2本指タップで もどす
+  gest=null;twoTap=null}
  drawing=false;strokeSnap=false;if(was){if(side==='back')clipBack();afterEdit()}
 }));
 pad.addEventListener('wheel',e=>{e.preventDefault();const r=pad.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,z=clamp(Z*(e.deltaY<0?1.15:1/1.15),1,5);
  setView(z,mx-(mx-TX)/Z*z,my-(my-TY)/Z*z)},{passive:false});
+document.addEventListener('keydown',e=>{if($('sDraw').hidden||e.target.tagName==='INPUT')return;const k=e.key.toLowerCase();
+ if((e.ctrlKey||e.metaKey)&&k==='z'){e.preventDefault();e.shiftKey?doRedo():doUndo()}else if((e.ctrlKey||e.metaKey)&&k==='y'){e.preventDefault();doRedo()}});
+/* 3Dの こまど（かきながら たしかめる） */
+const CORNERS=['tr','br','bl','tl'];
+$('drawView').addEventListener('click',()=>{const v=$('drawView'),i=CORNERS.indexOf(v.dataset.c||'tr');v.dataset.c=CORNERS[(i+1)%4]});
+function applyPreview(){const on=!!save.preview3d&&HAS3D;$('drawView').hidden=!on;if(!$('sDraw').hidden)setMode(on?'draw':'none');if(on)updatePreview()}
+function updatePreview(){
+ if(!HAS3D||!save.preview3d||$('sDraw').hidden)return;
+ if(!inkOf(cvF)){if(TMP){disposeCreature(TMP);TMP=null}return}
+ try{const src=newCanvas(640);src.getContext('2d').drawImage(cvF,0,0);const det=detectParts(src);
+  let back=null;if(inkOf(cvB)){const bk=newCanvas(640);bk.getContext('2d').drawImage(cvB,0,0);back=backToFront(bk,src)}
+  const old=TMP;TMP=buildCreature(src,det,1,{style:editing?editing.style:'cute',back});if(old){TMP.baseRY=old.baseRY;disposeCreature(old)}
+  setMode('draw')}catch(e){console.error(e)}
+}
 function drawSample(){
  const g=ctxF,K=COLORS[4].hex;
  g.strokeStyle=K;g.lineWidth=34;[[265,380,252,505],[375,380,388,505]].forEach(l=>{g.beginPath();g.moveTo(l[0],l[1]);g.lineTo(l[2],l[3]);g.stroke();g.fillStyle=COLORS[3].hex;g.beginPath();g.ellipse(l[2]+10,l[3]+10,34,18,0,0,7);g.fill();g.lineWidth=7;g.stroke();g.lineWidth=34});
@@ -855,6 +1014,8 @@ function detectParts(src){
   let type='arm';
   if(vy>.55*Math.abs(vx)&&py>bcy+(by1-bcy)*.35)type='leg';
   else if(vy<-.6*Math.abs(vx)&&py<bcy-(bcy-by0)*.45)type='horn';
+  else if(py<bcy-(bcy-by0)*.15&&cells.length>bn*.1)type='wing'; // からだの うえの ほうから おおきく ひろがる＝はね
+  else if(py>bcy+(by1-bcy)*.5&&Math.abs(vx)>1.4*Math.abs(vy))type='tail'; // からだの したの ほうから よこに のびる＝しっぽ
   comps.push({id,type,pivot:[px*2,py*2],n:cells.length});
  }
  return finish(lab,comps,W,[bcx*2,bcy*2]);
@@ -1089,7 +1250,7 @@ let arenaGround,PROPS={},boom,timeScale=1,renderer,scene,camera,hemi,clock,ranch
 const CRE={};
 const cam={fx:0,tfx:0,z:1,tz:1,shake:0};
 const tweens=[],parts=[],rings=[],grads={};
-const closeup=()=>mode==='card'||mode==='home';
+const closeup=()=>mode==='card'||mode==='home'||mode==='draw';
 function tween(ms,fn){return new Promise(res=>tweens.push({t:0,ms,fn,res}))}
 function grad(style){if(grads[style])return grads[style];const v=style==='cute'?[150,205,255]:[95,255],d=new Uint8Array(v.length*4);
  v.forEach((x,i)=>{d[i*4]=d[i*4+1]=d[i*4+2]=x;d[i*4+3]=255});const t=new THREE.DataTexture(d,v.length,1,THREE.RGBAFormat);
@@ -1188,7 +1349,7 @@ function init3D(){
  ranchEnv=buildRanch();arenaEnv=buildArena();scene.add(ranchEnv,arenaEnv);
  clock=new THREE.Clock();
  const el=renderer.domElement,tp=new Map();let pd=1,pz=1,sx=null,down=null;const zc=v=>clamp(v,.6,2.2);
- el.addEventListener('pointerdown',e=>{if(!closeup())return;el.setPointerCapture(e.pointerId);tp.set(e.pointerId,[e.clientX,e.clientY]);
+ el.addEventListener('pointerdown',e=>{if(!closeup()||mode==='draw')return;el.setPointerCapture(e.pointerId);tp.set(e.pointerId,[e.clientX,e.clientY]);
   if(tp.size===2){const [a,b]=[...tp.values()];pd=Math.hypot(a[0]-b[0],a[1]-b[1])||1;pz=camZoom;sx=null;down=null}else if(tp.size===1){sx=e.clientX;down={x:e.clientX,y:e.clientY,t:performance.now()}}});
  el.addEventListener('pointermove',e=>{if(!tp.has(e.pointerId))return;tp.set(e.pointerId,[e.clientX,e.clientY]);
   if(tp.size>=2){const [a,b]=[...tp.values()];camZoom=zc(pz*Math.hypot(a[0]-b[0],a[1]-b[1])/pd)}
@@ -1196,25 +1357,50 @@ function init3D(){
  ['pointerup','pointercancel'].forEach(t=>el.addEventListener(t,e=>{
   if(t==='pointerup'&&down&&tp.size===1&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<10&&performance.now()-down.t<400&&mode==='home'&&onTap)onTap(e);
   tp.delete(e.pointerId);sx=null;down=null}));
- el.addEventListener('wheel',e=>{if(!closeup())return;e.preventDefault();camZoom=zc(camZoom*(e.deltaY<0?1.1:1/1.1))},{passive:false});
+ el.addEventListener('wheel',e=>{if(!closeup()||mode==='draw')return;e.preventDefault();camZoom=zc(camZoom*(e.deltaY<0?1.1:1/1.1))},{passive:false});
  ['cardView','homeView','arenaView'].forEach(id=>new ResizeObserver(fit).observe($(id)));
  requestAnimationFrame(loop);
 }
 function fit(){if(!viewEl)return;const w=viewEl.clientWidth,h=viewEl.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}
 
+/* ふくらませかた：ラクガキ王国（Teddy）と おなじ かんがえかた。
+   りんかくの ちゅうしん（ほね）から そとへ むかって、だんめんが まるく なるように もりあげる */
 function inflate(src,ww,wh,cap,puff){
- const w=src.width,h=src.height,cols=clamp(Math.round(w/5),6,110),rows=clamp(Math.round(h/5),6,110);
+ const w=src.width,h=src.height,cols=clamp(Math.round(w/3),6,160),rows=clamp(Math.round(h/3),6,160),N=cols*rows;
  const mc=newCanvas(cols,rows),mg=mc.getContext('2d');mg.drawImage(src,0,0,cols,rows);
- const md=mg.getImageData(0,0,cols,rows).data,D=new Float32Array(cols*rows);
- for(let i=0;i<cols*rows;i++)D[i]=md[i*4+3]>40?1e6:0;
+ const md=mg.getImageData(0,0,cols,rows).data,D=new Float32Array(N);
+ for(let i=0;i<N;i++){const a=md[i*4+3]/255;D[i]=a>=.97?1e6:a>.03?a*.9:0} // ふちは すきとおり ぐあいで はんぱな きょりに（なめらかな りんかく）
  const at=(x,y)=>(x<0||y<0||x>=cols||y>=rows)?0:D[y*cols+x];
  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const i=y*cols+x;if(D[i])D[i]=Math.min(D[i],at(x-1,y)+1,at(x,y-1)+1,at(x-1,y-1)+1.41,at(x+1,y-1)+1.41)}
  for(let y=rows-1;y>=0;y--)for(let x=cols-1;x>=0;x--){const i=y*cols+x;if(D[i])D[i]=Math.min(D[i],at(x+1,y)+1,at(x,y+1)+1,at(x+1,y+1)+1.41,at(x-1,y+1)+1.41)}
- const cell=(ww/cols+wh/rows)/2,geo=new THREE.PlaneGeometry(ww,wh,cols-1,rows-1),P=geo.attributes.position;
- for(let i=0;i<P.count;i++){const d=D[i];P.setZ(i,d>0?Math.min(cap,Math.sqrt(d)*cell*1.7*puff):0)}
+ // R＝その ばしょの「ふとさの はんぶん」。ふちから いちばん きゅうな のぼりざかを たどって ほねの あたいを もってくる
+ const idx=[];for(let i=0;i<N;i++)if(D[i]>0)idx.push(i);idx.sort((a,b)=>D[b]-D[a]);
+ const R=new Float32Array(N),NB=[[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,1.41],[-1,1,1.41],[1,-1,1.41],[-1,-1,1.41]];
+ for(const i of idx){const x=i%cols,y=(i-x)/cols;let r=D[i],best=-1;
+  for(const [dx,dy,st] of NB){const a=x+dx,b=y+dy;if(a<0||b<0||a>=cols||b>=rows)continue;const j=b*cols+a;const g=(D[j]-D[i])/st;if(g>.8&&g>best){best=g;r=Math.max(D[i],R[j])}}
+  R[i]=r}
+ const H=new Float32Array(N);
+ for(const i of idx){const r=R[i],d=Math.min(r,D[i]);H[i]=Math.sqrt(Math.max(0,r*r-(r-d)*(r-d)))}
+ const H2=H.slice(); // かくかくを なめらかに
+ for(const i of idx){const x=i%cols,y=(i-x)/cols;let t=H[i]*2,n=2;for(const [dx,dy] of NB){const a=x+dx,b=y+dy;if(a<0||b<0||a>=cols||b>=rows)continue;const j=b*cols+a;if(D[j]>0){t+=H[j];n++}}H2[i]=t/n}
+ const cell=(ww/cols+wh/rows)/2,zf=clamp(puff*.85,.7,1.05),geo=new THREE.PlaneGeometry(ww,wh,cols-1,rows-1),P=geo.attributes.position;
+ for(let i=0;i<P.count;i++)P.setZ(i,D[i]>0?Math.min(cap,H2[i]*cell*zf):0);
  geo.computeVertexNormals();return geo;
 }
-function partMat(cv,style){const tex=texFrom(cv),opt={map:tex,alphaTest:.5,side:THREE.FrontSide,emissive:new THREE.Color(0)};
+/* ふちの すきまを なくす：まわりの いろを 3px ぶん にじませて ふとうめいに する */
+function bleedInto(dst,src){
+ const W=src.width,H=src.height;if(dst.width!==W||dst.height!==H){dst.width=W;dst.height=H}
+ const sg=src.getContext('2d'),img=sg.getImageData(0,0,W,H),d=img.data,A=new Uint8Array(W*H);
+ for(let i=0;i<W*H;i++)A[i]=d[i*4+3]>=110?1:0;
+ for(let pass=0;pass<3;pass++){const nA=A.slice();
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(A[i])continue;let j=-1;
+   if(x>0&&A[i-1])j=i-1;else if(x<W-1&&A[i+1])j=i+1;else if(y>0&&A[i-W])j=i-W;else if(y<H-1&&A[i+W])j=i+W;
+   if(j>=0){d[i*4]=d[j*4];d[i*4+1]=d[j*4+1];d[i*4+2]=d[j*4+2];nA[i]=1}}
+  A.set(nA)}
+ for(let i=0;i<W*H;i++)d[i*4+3]=A[i]?255:0;
+ dst.getContext('2d').putImageData(img,0,0);return dst;
+}
+function partMat(cv,style){const bl=bleedInto(newCanvas(cv.width,cv.height),cv),tex=texFrom(bl);tex._src=cv;const _t=0,opt={map:tex,alphaTest:.5,side:THREE.FrontSide,emissive:new THREE.Color(0)};
  return{tex,mat:style==='none'?new THREE.MeshStandardMaterial({...opt,roughness:.8,metalness:0}):new THREE.MeshToonMaterial({...opt,gradientMap:grad(style)})}}
 function newAnim(){return{walk:0,armF:0,armB:0,raise:0,flail:0,droop:0,squash:0,guard:0,guardT:0}}
 function makeCrown(c){
@@ -1233,12 +1419,12 @@ function buildCreature(src0,det,face,opt){
  const group=new THREE.Group(),flip=new THREE.Group(),torso=new THREE.Group();flip.scale.x=face;group.add(flip);flip.add(torso);
  const ol=style==='cute'?[5,'#5a4038']:style==='cool'?[9,'#120e0c']:null;
  if(ol)torso.position.y=ol[0]*k;
- const c={group,torso,face,style,rank,mats:[],disp:[],hit:[],arms:[],legs:[],horns:[],baseX:0,baseZ:0,baseRY:0,userSpin:0,phase:Math.random()*10,
+ const c={group,torso,face,style,rank,mats:[],disp:[],hit:[],arms:[],legs:[],horns:[],wings:[],tails:[],baseX:0,baseZ:0,baseRY:0,userSpin:0,phase:Math.random()*10,
   ox:0,oy:0,oz:0,rz:0,spin:0,shake:0,flash:0,fc:[1,.15,0],ko:false,anim:newAnim(),height:(uy1-uy0)*k};
  const bodyX=wx(det.bc[0]),puff=style==='cute'?1.25:style==='cool'?.82:1;
  [{id:1,type:'body'}].concat(det.comps).forEach(p=>{
   let cr=cropPart(src,det,p.id),cb=cropPart(bk,det,p.id);if(!cr)return;if(ol){cr=outlineCrop(cr,ol[0],ol[1]);cb=outlineCrop(cb,ol[0],ol[1])}
-  const geo=inflate(cr.cv,cr.w*k,cr.h*k,(p.type==='body'?SZ*.24:SZ*.1)*puff,puff),F=partMat(cr.cv,style),B=partMat(cb.cv,style);
+  const geo=inflate(cr.cv,cr.w*k,cr.h*k,SZ*.55,puff),F=partMat(cr.cv,style),B=partMat(cb.cv,style);
   const dmat=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map:F.tex,alphaTest:.5,side:THREE.DoubleSide});
   c.mats.push(F.mat,B.mat);c.disp.push(geo,F.mat,F.tex,B.mat,B.tex,dmat);
   const ccx=wx(cr.X0+cr.w/2),ccy=wy(cr.Y0+cr.h/2),holder=new THREE.Group();
@@ -1249,6 +1435,8 @@ function buildCreature(src0,det,face,opt){
   if(p.type==='arm')c.arms.push({g:holder,s:Math.sign(px-bodyX)||1,i:c.arms.length});
   if(p.type==='leg')c.legs.push({g:holder,x:px});
   if(p.type==='horn')c.horns.push({g:holder,i:c.horns.length});
+  if(p.type==='wing')c.wings.push({g:holder,s:Math.sign(px-bodyX)||1});
+  if(p.type==='tail')c.tails.push({g:holder,i:c.tails.length});
  });
  c.legs.sort((a,b)=>a.x-b.x).forEach((l,i)=>l.i=i);
  if(rank>=2){const B=bodyBox(det),cr=makeCrown(c);cr.position.set(bodyX,wy(B.y0)+.1,0);cr.scale.setScalar(rank>=3?1.35:1);torso.add(cr)}
@@ -1263,18 +1451,18 @@ const ranchList=()=>Object.values(CRE).map(x=>x.c);
 
 function setMode(m){
  mode=m;if(!HAS3D)return;
- viewEl={card:$('cardView'),home:$('homeView'),battle:$('arenaView')}[m]||null;
- if(viewEl){viewEl.insertBefore(renderer.domElement,viewEl.firstChild);renderer.domElement.style.touchAction=closeup()?'none':'pan-y';fit()}
- const ranch=m!=='battle';ranchEnv.visible=ranch;arenaEnv.visible=!ranch;
- const th=ranch?null:(arenaTheme||{bg:'#fbf8ef',ground:'#ffffff',props:''});
- const bg=ranch?'#cdeafc':th.bg;scene.background.set(bg);scene.fog.color.set(bg);scene.fog.near=ranch?14:10;scene.fog.far=ranch?30:22;
+ viewEl={card:$('cardView'),home:$('homeView'),battle:$('arenaView'),draw:$('drawView'),draw3d:$('d3View')}[m]||null;
+ if(viewEl){viewEl.insertBefore(renderer.domElement,viewEl.firstChild);renderer.domElement.style.touchAction=closeup()||m==='draw3d'?'none':'pan-y';fit()}
+ const d3=m==='draw3d',ranch=m!=='battle'&&!d3;ranchEnv.visible=ranch;arenaEnv.visible=m==='battle';if(ED.env){ED.env.visible=d3;ED.group.visible=d3}
+ const th=m==='battle'?(arenaTheme||{bg:'#fbf8ef',ground:'#ffffff',props:''}):null;
+ const bg=d3?'#f6f1e6':ranch?'#cdeafc':th.bg;scene.background.set(bg);scene.fog.color.set(bg);scene.fog.near=d3?20:ranch?14:10;scene.fog.far=d3?40:ranch?30:22;
  if(th){arenaGround.material.color.set(th.ground);for(const k in PROPS)PROPS[k].visible=false;if(th.props)propsFor(th.props).visible=true;
   if(viewEl)viewEl.style.background=th.bg}
  if(closeup())camZoom=1;
  ranchList().forEach(c=>c.group.visible=m==='home'||(m==='battle'&&c===PC));
- if(TMP)TMP.group.visible=m==='card';
+ if(TMP)TMP.group.visible=m==='card'||m==='draw';
  if(EC)EC.group.visible=m==='battle';
- if(m==='card'&&TMP){Object.assign(TMP,{baseX:0,baseZ:0,baseRY:0});TMP.anim.walk=.55}
+ if((m==='card'||m==='draw')&&TMP){Object.assign(TMP,{baseX:0,baseZ:0,baseRY:0});TMP.anim.walk=.55}
  if(m==='battle'&&PC){Object.assign(PC,{baseX:-1.8,baseZ:0,baseRY:.35});PC.anim.walk=0}
  if(m==='home'&&PC){Object.assign(PC,{baseX:0,baseZ:1.3,baseRY:0});PC.anim.walk=0}
 }
@@ -1356,13 +1544,17 @@ function loop(){
   c.arms.forEach(a=>{a.g.rotation.z=a.s*(.14*Math.sin(tt*3+a.i*1.7)*id+A.walk*.75*Math.sin(tt*13+a.i*Math.PI)+A.raise*1.35+A.guard*1.0+ready
    +A.flail*.9*Math.sin(tt*30+a.i*2)-A.droop*.95+(cute?.12*Math.sin(tt*6.5)*id:0))+(a.s>0?A.armF:A.armB)*a.s});
   c.legs.forEach(l=>{l.g.rotation.z=.07*Math.sin(tt*3+l.i*Math.PI)*id+A.walk*.6*Math.sin(tt*13+l.i*Math.PI)+A.flail*.4*Math.sin(tt*25+l.i)+A.droop*.3*(l.i%2?1:-1)});
+  c.wings.forEach(w=>{w.g.rotation.z=w.s*(.55*Math.sin(tt*(A.walk?16:9))*id+.2)+A.flail*.6*Math.sin(tt*30)});
+  c.tails.forEach(q=>{q.g.rotation.z=.35*Math.sin(tt*3.5+q.i)*id+A.walk*.25*Math.sin(tt*10)+A.flail*.5*Math.sin(tt*24)});
   c.horns.forEach(h=>{h.g.rotation.z=.12*Math.sin(tt*6+h.i*2)*id+A.flail*.5*Math.sin(tt*28+h.i)+A.raise*.15*Math.sin(tt*20)});
   c.mats.forEach(m=>m.emissive.setRGB(c.flash*c.fc[0],c.flash*c.fc[1],c.flash*c.fc[2]));
   c.bubble.visible=A.guard>.03;c.bubble.scale.setScalar(Math.max(.01,A.guard)*(1+Math.sin(t*4)*.03));
   if(c.rank>=1&&!c.ko&&Math.random()<real*(c.rank>=3?14:7)){const a=Math.random()*Math.PI*2,r=rnd(.5,1.2);
    spawn(c.group.position.x+Math.cos(a)*r,rnd(.1,c.height*.9),c.group.position.z+Math.sin(a)*r*.6,0,rnd(.4,1),0,pick(c.rank>=3?['#f2b705','#ffffff','#ff7aa2','#7fb2ff']:['#f2b705','#fff3b0']),rnd(.03,.06),rnd(.6,1),-.2)}
  });
- if(mode==='card'){if(TMP)TMP.baseRY+=real*.7;const k=1/camZoom;camera.position.set(0,1.1+.6*k,5*k);camera.lookAt(0,1.1,0)}
+ if(mode==='card'||mode==='draw'){if(TMP)TMP.baseRY+=real*.7;const k=1/camZoom;camera.position.set(0,1.1+.6*k,5*k);camera.lookAt(0,1.1,0)}
+ else if(mode==='draw3d'){ED.yaw+=(ED.Y-ED.yaw)*Math.min(1,real*8);ED.pitch+=(ED.P-ED.pitch)*Math.min(1,real*8);const cp=Math.cos(ED.pitch);
+  camera.position.set(Math.sin(ED.yaw)*cp*ED.dist,ED.ty+Math.sin(ED.pitch)*ED.dist,Math.cos(ED.yaw)*cp*ED.dist);camera.lookAt(0,ED.ty,0)}
  else if(mode==='home'){const k=1/camZoom;camera.position.set(Math.sin(t*.15)*.4,1.4+3.6*k,1.3+7.6*k);camera.lookAt(0,.9+.4*(1-k),1.3-3.4*k)}
  else{
   cam.fx+=(cam.tfx-cam.fx)*Math.min(1,real*4);cam.z+=(cam.tz-cam.z)*Math.min(1,real*4);cam.shake*=Math.exp(-real*9);
@@ -1569,20 +1761,23 @@ async function clash(ph,eh){ // あいこ：まんなかで ぶつかりあう
 }
 
 /* ================= 画面切りかえ ================= */
-const S=['sHome','sList','sDraw','sCard','sBattle','sRes','sMap','sStory'];
-function show(id){S.forEach(s=>$(s).hidden=s!==id);const sg={sHome:'ranch',sList:'ranch',sDraw:'ranch',sCard:'ranch',sMap:'map'}[id];if(sg)bgm(sg);syncMute();document.body.classList.toggle('homeMode',id==='sHome');setMode({sCard:'card',sHome:'home',sBattle:'battle'}[id]||'none');window.scrollTo({top:0,behavior:'smooth'})}
+const S=['sHome','sList','sDraw','sCard','sBattle','sRes','sMap','sStory','sChoose','sDraw3d'];
+function show(id){S.forEach(s=>$(s).hidden=s!==id);const sg={sHome:'ranch',sList:'ranch',sDraw:'ranch',sCard:'ranch',sMap:'map',sChoose:'ranch',sDraw3d:'ranch'}[id];if(sg)bgm(sg);syncMute();document.body.classList.toggle('homeMode',id==='sHome');setMode({sCard:'card',sHome:'home',sBattle:'battle',sDraw:save.preview3d&&HAS3D?'draw':'none',sDraw3d:'draw3d'}[id]||'none');window.scrollTo({top:0,behavior:'smooth'})}
 const srcCache={};
 function loadImg(key,url){
  if(!url)return Promise.resolve(null);
  if(srcCache[key]&&srcCache[key].url===url)return Promise.resolve(srcCache[key].cv);
  return new Promise(res=>{const im=new Image();im.onload=()=>{const c=newCanvas(640);c.getContext('2d').drawImage(im,0,0,640,640);srcCache[key]={url,cv:c};res(c)};im.onerror=()=>res(null);im.src=url});
 }
-const creKey=m=>[m.img.length,m.img.slice(-40),(m.back||'').length,m.style,rankOf(m.lv),(m.types||[]).join(),Math.min(m.lv,20)].join('|');
+const creKey=m=>[m.kind||'2d',(m.parts||[]).map(p=>p.f.length+p.r).join(','),m.img.length,m.img.slice(-40),(m.back||'').length,m.style,rankOf(m.lv),(m.types||[]).join(),Math.min(m.lv,20)].join('|');
 async function ensureCre(m){
  if(!HAS3D)return null;const key=creKey(m);
  if(CRE[m.id]&&CRE[m.id].key===key)return CRE[m.id].c;
- const src=await loadImg(m.id,m.img)||newCanvas(640),bkRaw=await loadImg(m.id+'b',m.back),det=applyTypes(detectParts(src),m.types);
- const old=CRE[m.id];const c=buildCreature(src,det,1,{style:m.style,rank:rankOf(m.lv),scale:1+Math.min(m.lv-1,20)*.012,back:bkRaw?backToFront(bkRaw,src):null});
+ const old=CRE[m.id],sc=1+Math.min(m.lv-1,20)*.012;let c;
+ if(m.kind==='3d'){const parts=[];for(let i=0;i<m.parts.length;i++){const sp=m.parts[i];parts.push({fc:await cvCache(m.id+'p'+i+'f',sp.f),bc:await cvCache(m.id+'p'+i+'b',sp.b||sp.f),w:sp.w,h:sp.h,c:sp.c,q:sp.q,p:sp.p,r:sp.r})}
+  c=buildCreature3D(parts,1,{style:m.style,rank:rankOf(m.lv),scale:sc})}
+ else{const src=await loadImg(m.id,m.img)||newCanvas(640),bkRaw=await loadImg(m.id+'b',m.back),det=applyTypes(detectParts(src),m.types);
+  c=buildCreature(src,det,1,{style:m.style,rank:rankOf(m.lv),scale:sc,back:bkRaw?backToFront(bkRaw,src):null})}
  if(old){c.baseX=old.c.baseX;c.baseZ=old.c.baseZ;c.baseRY=old.c.baseRY;disposeCreature(old.c)}else{const sp=freeSpot(c);c.baseX=sp.tx;c.baseZ=sp.tz}
  c.monId=m.id;CRE[m.id]={key,c};return c;
 }
@@ -1768,13 +1963,51 @@ function showList(msg){
 }
 $('lBack').onclick=()=>showHome();
 
+
+/* ================= かたちで つよさが かわる（らくがき しんだん） ================= */
+function shapeCount(det){const c={arm:0,leg:0,horn:0,wing:0,tail:0};det.comps.forEach(x=>{if(c[x.type]!=null)c[x.type]++});return c}
+function withShape(base,det,src){
+ const c=shapeCount(det),b={...base},add={atk:Math.min(c.arm,4)*3,def:Math.min(c.leg,4)*2,spd:Math.min(c.wing,4)*4,hp:Math.min(c.tail,2)*10,crit:Math.min(c.horn,3)*.03};
+ b.atk+=add.atk;b.def+=add.def;b.spd+=add.spd;b.hp+=add.hp;b.crit=add.crit;b.shape=c;
+ if(src){const a=analyze(src);b.area=a.tot/(320*320);const d=src.getContext('2d').getImageData(0,0,640,640).data,cn={};let t=0;
+  for(let i=0;i<d.length;i+=32)if(d[i+3]>200){const n=nearPal(d[i],d[i+1],d[i+2]).name;cn[n]=(cn[n]||0)+1;t++}
+  b.ncol=Object.values(cn).filter(v=>v>t*.025).length} // にじんだ ふちは かぞえない
+ return b;
+}
+const NM={r:['メラ','ボウ','ヒノ','カッカ'],b:['アクア','ザブ','ミズ','ポチャ'],g:['リーフ','モリ','ハッパ','ツタ'],y:['ピカ','バリ','ゴロ','ビリ'],k:['クロ','ヤミ','シャド','ズン']};
+function genName(b){
+ const c=b.shape||{},mid=c.wing?'バサ':c.horn>=2?'トゲ':c.arm>=3?'ウデ':c.leg>=3?'アシ':c.tail?'シッポ':b.area>.3?'デカ':'';
+ const suf=b.area>.32?['ドン','ゴン','キング','ザウルス']:b.area<.12?['ピー','チュン','ミニ','ポコ']:['マル','ラ','ゾウ','ボー','ガー'];
+ return (pick(NM[b.el]||NM.k)+mid+pick(suf)).slice(0,10);
+}
+function traits(b){
+ const c=b.shape||{},L=[];
+ L.push(`<b>${EL[b.el].n}</b>の ちからを もつ らくがき。`);
+ if(b.area>.3)L.push('からだが おおきくて タフ。');else if(b.area<.12)L.push('ちいさくて すばしっこい。');
+ if(c.arm)L.push(`うでが ${c.arm}ほん。パンチが とくい（<b>こうげき+${Math.min(c.arm,4)*3}</b>）`);
+ if(c.leg)L.push(`あしが ${c.leg}ほん。ふんばりが きく（<b>ぼうぎょ+${Math.min(c.leg,4)*2}</b>）`);else L.push('あしが ない…？ ふわふわ うかんで いるみたい。');
+ if(c.horn)L.push(`つのが ${c.horn}ほん。きゅうしょを ねらう（<b>クリティカル+${Math.min(c.horn,3)*3}%</b>）`);
+ if(c.wing)L.push(`はねで すばやく とびまわる（<b>すばやさ+${Math.min(c.wing,4)*4}</b>）`);
+ if(c.tail)L.push(`しっぽで バランス ばつぐん（<b>HP+${Math.min(c.tail,2)*10}</b>）`);
+ if(b.ncol>=6)L.push(`${b.ncol}しょくも つかった カラフルな からだ！`);
+ if(!c.arm&&!c.leg&&!c.horn&&!c.wing&&!c.tail)L.push('てあしの ない シンプルな かたち。からだから ほそく のばすと パーツに なるよ。');
+ return L;
+}
+$('nmAuto').onclick=()=>{try{const a=analyze(cvF);if(a.tot<200){$('dmsg').textContent='さきに えを かいてね';return}
+ $('nm').value=genName(withShape(makeStats(a),detectParts(cvF),cvF));saveDraft();se('good')}catch(e){}};
 /* ================= 描く → 確認 ================= */
 let editing=null,pend=null;
-async function startDraw(m){
- editing=m;undoF.length=0;undoB.length=0;askedBack=false;ctxF.clearRect(0,0,640,640);ctxB.clearRect(0,0,640,640);setView(1,0,0);$('dmsg').textContent='';
+async function startDraw(m,direct){
+ if(m&&m.kind==='3d')return open3D(m);
+ if(!m&&!direct){$('chBack').hidden=!save.mons.length;show('sChoose');return}
+ editing=m;undoF.length=0;undoB.length=0;redoF.length=0;redoB.length=0;askedBack=false;ctxF.clearRect(0,0,640,640);ctxB.clearRect(0,0,640,640);setView(1,0,0);$('dmsg').textContent='';
  if(m){ctxF.drawImage(await loadImg(m.id,m.img)||newCanvas(640),0,0);const b=await loadImg(m.id+'b',m.back);if(b)ctxB.drawImage(b,0,0);$('nm').value=m.name;askedBack=true}
- else{$('nm').value='ラクガキング';if(!save.mons.length)drawSample()}
- $('dBack').hidden=!save.mons.length;show('sDraw');setSide('front');syncGo();
+ else{$('nm').value='';const dr=loadDraft();
+  if(dr&&!dr.ed&&dr.f){const im=await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=dr.f});if(im)ctxF.drawImage(im,0,0);
+   if(dr.b){const ib=await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=dr.b});if(ib)ctxB.drawImage(ib,0,0)}
+   $('nm').value=dr.name||'';$('dmsg').textContent='かきかけの えを ふっかつ したよ（「ぜんぶけす」で さいしょから）'}
+  else if(!save.mons.length)drawSample()}
+ $('dBack').hidden=!save.mons.length;show('sDraw');setSide('front');syncGo();applyPreview();
 }
 function syncGo(){$('go').textContent=side==='front'&&!askedBack?'つぎは うしろすがた →':editing?'かきたし かんりょう！':'いのちを ふきこむ！'}
 $('sideTabs').querySelectorAll('button').forEach(b=>b.addEventListener('click',syncGo));
@@ -1785,21 +2018,27 @@ $('go').onclick=()=>{
  if(side==='front'&&!askedBack){askedBack=true;setSide('back');syncGo();$('dmsg').textContent='';$('phint').textContent='うしろすがたも かいてみよう（みぎと ひだりが はんたい）。かかなくても「いのちを ふきこむ」で おまかせに なるよ';return}
  $('dmsg').textContent='';const src=newCanvas(640);src.getContext('2d').drawImage(cvF,0,0);
  let back=null;if(inkOf(cvB)){back=newCanvas(640);back.getContext('2d').drawImage(cvB,0,0)}
- pend={src,back,det:detectParts(src),base:makeStats(a),name:$('nm').value.trim()||'ラクガキング',style:editing?editing.style:'cute'};
+ const det=detectParts(src),base=withShape(makeStats(a),det,src);
+ pend={src,back,det,base,name:$('nm').value.trim()||genName(base),style:editing?editing.style:'cute'};
  showCard();
 };
 function rebuildPend(){if(!HAS3D)return;disposeCreature(TMP);const lv=editing?editing.lv:1;
+ if(pend.kind==='3d'){TMP=buildCreature3D(pend.parts,1,{style:pend.style,rank:rankOf(lv)});PC=TMP;setMode('card');return}
  TMP=buildCreature(pend.src,pend.det,1,{style:pend.style,rank:rankOf(lv),back:pend.back?backToFront(pend.back,pend.src):null});PC=TMP;setMode('card')}
 function showCard(){
- show('sCard');rebuildPend();drawPreview();syncStyle();$('cmsg').textContent='';
+ show('sCard');rebuildPend();drawPreview();syncStyle();$('cmsg').textContent='';renderCardStats();
+}
+function renderCardStats(){
+ $('cTraits').innerHTML=traits(pend.base).map(t=>`<li>${t}</li>`).join('');
  const st=editing?statsOf({...editing,base:pend.base}):{maxhp:pend.base.hp,atk:pend.base.atk,def:pend.base.def,spd:pend.base.spd,el:pend.base.el};
  $('cStats').innerHTML=`<div class="ttl">${esc(pend.name)}<span class="tag" style="background:${EL[st.el].c}">${EL[st.el].n}</span>${editing?`<span class="note"> Lv${editing.lv}</span>`:''}</div>`+statRows(st)+
-  `<div class="note">ひっさつ：${SP[st.el].n}（${SP[st.el].d}）・うしろすがた：${pend.back?'じぶんで かいた':'おまかせ'}</div>`;
+  `<div class="note">ひっさつ：${SP[st.el].n}（${SP[st.el].d}）・${pend.kind==='3d'?'くるくる3Dで かいた こ':'うしろすがた：'+(pend.back?'じぶんで かいた':'おまかせ')}</div>`;
  $('decide').textContent=editing?'これで けってい！':'このこに けってい！';
 }
 function syncStyle(){$('styles').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===pend.style));$('styleNote').textContent=STYLE_NOTE[pend.style]}
 $('styles').querySelectorAll('button').forEach(b=>b.onclick=()=>{pend.style=b.dataset.s;syncStyle();rebuildPend()});
 function drawPreview(){
+ $('pv').closest('.box').hidden=pend.kind==='3d';if(pend.kind==='3d')return;
  const pv=$('pv'),g=pv.getContext('2d'),src=pend.src,det=pend.det;g.clearRect(0,0,320,320);
  const box=analyze(src).box,s=Math.min(300/(box[2]-box[0]),300/(box[3]-box[1]),1),ox=(320-(box[2]-box[0])*s)/2,oy=(320-(box[3]-box[1])*s)/2;
  pv._map={box,s,ox,oy};
@@ -1809,30 +2048,333 @@ function drawPreview(){
  for(let i=0;i<W*W;i++){const v=L2[i];if(v<2||!col[v])continue;const x=i%W,y=(i-x)/W;g.fillStyle=col[v];g.fillRect(ox+(x*2-box[0])*s,oy+(y*2-box[1])*s,2*s+.6,2*s+.6)}
  g.globalAlpha=1;
  det.comps.forEach(c=>{const x=ox+(c.pivot[0]-box[0])*s,y=oy+(c.pivot[1]-box[1])*s;g.fillStyle='#fff';g.strokeStyle='#2b2622';g.lineWidth=3;g.beginPath();g.arc(x,y,7,0,7);g.fill();g.stroke()});
- const cnt={arm:0,leg:0,horn:0,none:0};det.comps.forEach(c=>cnt[c.type]++);
- $('chips').innerHTML=['arm','leg','horn','none'].filter(k=>cnt[k]||k!=='none').map(k=>`<span class="chip"><i style="background:${PT[k].c}"></i>${PT[k].n} ${cnt[k]}</span>`).join('')+
+ const cnt={arm:0,leg:0,horn:0,wing:0,tail:0,none:0};det.comps.forEach(c=>cnt[c.type]++);
+ $('chips').innerHTML=['arm','leg','horn','wing','tail','none'].filter(k=>cnt[k]||k!=='none').map(k=>`<span class="chip"><i style="background:${PT[k].c}"></i>${PT[k].n} ${cnt[k]}</span>`).join('')+
   (det.comps.length?'':'<span class="note">ほそく のびた ところが みつからなかったよ。からだだけで ゆれて うごくよ。</span>');
 }
 $('pv').addEventListener('click',e=>{
- if(!pend||!$('pv')._map)return;const r=$('pv').getBoundingClientRect(),m=$('pv')._map,det=pend.det;
+ if(!pend||pend.kind==='3d'||!$('pv')._map)return;const r=$('pv').getBoundingClientRect(),m=$('pv')._map,det=pend.det;
  const px=(e.clientX-r.left)*320/r.width,py=(e.clientY-r.top)*320/r.height,ix=(px-m.ox)/m.s+m.box[0],iy=(py-m.oy)/m.s+m.box[1];
  const W=det.W,gx=Math.round(ix/2),gy=Math.round(iy/2);let hit=0;
  for(let rad=0;rad<=8&&!hit;rad++)for(let dy=-rad;dy<=rad&&!hit;dy++)for(let dx=-rad;dx<=rad;dx++){const x=gx+dx,y=gy+dy;if(x<0||y<0||x>=W||y>=W)continue;const v=det.L2[y*W+x];if(v>1){hit=v;break}}
  const c=det.comps.find(c=>c.id===hit);if(!c)return;
- c.type=CYCLE[(CYCLE.indexOf(c.type)+1)%CYCLE.length];drawPreview();rebuildPend();
+ c.type=CYCLE[(CYCLE.indexOf(c.type)+1)%CYCLE.length];pend.base=withShape(makeStats(analyze(pend.src)),pend.det,pend.src);drawPreview();rebuildPend();renderCardStats();
 });
-$('redraw').onclick=()=>{show('sDraw');setSide(side);syncGo()};
+$('redraw').onclick=()=>{if(pend&&pend.kind==='3d'){show('sDraw3d');edResize();edSync();return}show('sDraw');setSide(side);syncGo();applyPreview()};
 $('decide').onclick=()=>{
- const types=pend.det.comps.map(c=>c.type),img=pend.src.toDataURL('image/png'),back=pend.back?pend.back.toDataURL('image/png'):null;
+ let types=null,img,back=null,kind='2d',parts=null;
+ if(pend.kind==='3d'){kind='3d';const th=newCanvas(320);th.getContext('2d').drawImage(pend.src,0,0,320,320);img=th.toDataURL('image/png');
+  const enc=cv=>{const u=cv.toDataURL('image/webp',.9);return u.startsWith('data:image/webp')?u:cv.toDataURL('image/png')};
+  parts=pend.parts.map(p=>({f:enc(p.fc),b:enc(p.bc),w:p.w,h:p.h,c:p.c,q:p.q,p:p.p,r:p.r,tw:p.tw}))}
+ else{types=pend.det.comps.map(c=>c.type);img=pend.src.toDataURL('image/png');back=pend.back?pend.back.toDataURL('image/png'):null}
  let m=editing;
- if(m){Object.assign(m,{img,back,base:pend.base,types,style:pend.style,name:pend.name})}
+ if(m){Object.assign(m,{img,back,base:pend.base,types,style:pend.style,name:pend.name,kind,parts})}
  else{if(save.mons.length>=MAXMON){$('cmsg').textContent='てもちが いっぱい（6たい）。「てもち」で だれかと わかれてね';return}
-  m={id:'m'+Date.now().toString(36),name:pend.name,img,back,base:pend.base,types,style:pend.style,lv:1,exp:0,bonus:{hp:0,atk:0,def:0,spd:0},love:10,stage:1,wins:0};
+  m={id:'m'+Date.now().toString(36),name:pend.name,img,back,base:pend.base,types,style:pend.style,kind,parts,lv:1,exp:0,bonus:{hp:0,atk:0,def:0,spd:0},love:10,stage:1,wins:0};
   save.mons.push(m)}
- save.cur=m.id;const ok=persist();disposeCreature(TMP);TMP=null;PC=null;
+ save.cur=m.id;const ok=persist();clearDraft();disposeCreature(TMP);TMP=null;PC=null;
 setTimeout(()=>speak('me',editing?'かっこよく なったでしょ！':`ぼく ${m.name}！ よろしくね！`,{interrupt:true}),900);
  showHome(ok?(editing?'かきたし できた！':`${m.name} が ぼくじょうに やってきた！`):'ほぞんに しっぱいしたよ。ページを とじると きえるかも');
 };
+
+/* ================= くるくる3D（ラクガキ王国ふう：まわしながら パーツを かきたす） ================= */
+const V3=a=>new THREE.Vector3(a[0],a[1],a[2]),Q4=a=>new THREE.Quaternion(a[0],a[1],a[2],a[3]);
+function copyCv(cv){const c=newCanvas(cv.width,cv.height);c.getContext('2d').drawImage(cv,0,0);return c}
+function flipCv(cv){const c=newCanvas(cv.width,cv.height),g=c.getContext('2d');g.translate(cv.width,0);g.scale(-1,1);g.drawImage(cv,0,0);return c}
+function urlCv(url){return new Promise(res=>{if(!url)return res(null);const im=new Image();im.onload=()=>{const c=newCanvas(im.naturalWidth||1,im.naturalHeight||1);c.getContext('2d').drawImage(im,0,0);res(c)};im.onerror=()=>res(null);im.src=url})}
+const cvCacheMap={};
+async function cvCache(key,url){const h=cvCacheMap[key];if(h&&h.url===url)return h.cv;const cv=await urlCv(url)||newCanvas(4);cvCacheMap[key]={url,cv};return cv}
+function colorize(cv,style){
+ if(style==='none')return cv;const o=copyCv(cv),g=o.getContext('2d'),img=g.getImageData(0,0,o.width,o.height),p=img.data,cute=style==='cute';
+ for(let i=0;i<p.length;i+=4){if(!p[i+3])continue;let r=p[i],gg=p[i+1],b=p[i+2];const l=(r+gg+b)/3,s=cute?1.12:1.3;
+  r=l+(r-l)*s;gg=l+(gg-l)*s;b=l+(b-l)*s;
+  if(cute){r=r*.84+255*.16;gg=gg*.84+250*.16;b=b*.84+245*.16}else{r=(r-128)*1.12+120;gg=(gg-128)*1.12+118;b=(b-128)*1.12+122}
+  p[i]=clamp(r,0,255);p[i+1]=clamp(gg,0,255);p[i+2]=clamp(b,0,255)}
+ g.putImageData(img,0,0);return o;
+}
+function outlineCv(cv,w,col){const p=Math.ceil(w)+2,c=newCanvas(cv.width+p*2,cv.height+p*2),g=c.getContext('2d'),sil=copyCv(cv),sg=sil.getContext('2d');
+ sg.globalCompositeOperation='source-in';sg.fillStyle=col;sg.fillRect(0,0,cv.width,cv.height);
+ for(let a=0;a<12;a++)g.drawImage(sil,p+Math.cos(a/12*Math.PI*2)*w,p+Math.sin(a/12*Math.PI*2)*w);g.drawImage(cv,p,p);return c}
+function partMeshes(w,h,fc,bc,style,puff,store){
+ const geo=inflate(fc,w,h,Math.max(w,h),puff),F=partMat(fc,style),B=partMat(bc,style);
+ const dmat=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map:F.tex,alphaTest:.5,side:THREE.DoubleSide});
+ const g=new THREE.Group(),ms=[];
+ [[1,F.mat,'f'],[-1,B.mat,'b']].forEach(([z,mat,sd])=>{const m=new THREE.Mesh(geo,mat);m.scale.z=z;m.castShadow=true;m.customDepthMaterial=dmat;m.userData.side=sd;g.add(m);ms.push(m)});
+ if(store)store.push(geo,F.mat,F.tex,B.mat,B.tex,dmat);
+ return{g,ms,F,B};
+}
+/* 3Dで かいた パーツ → ゲームで うごく モンスター */
+function buildCreature3D(parts,face,opt){
+ opt=opt||{};const style=opt.style||'none',rank=opt.rank||0,puff=style==='cute'?1.25:style==='cool'?.82:1;
+ const group=new THREE.Group(),flip=new THREE.Group(),torso=new THREE.Group(),norm=new THREE.Group();flip.scale.x=face;group.add(flip);flip.add(torso);torso.add(norm);
+ const bb=new THREE.Box3();
+ parts.forEach(pt=>{const q=Q4(pt.q),c=V3(pt.c),t=Math.min(pt.w,pt.h)*.5;
+  for(const sx of[-1,1])for(const sy of[-1,1])for(const sz of[-1,1])bb.expandByPoint(new THREE.Vector3(sx*pt.w*.42,sy*pt.h*.42,sz*t*.7).applyQuaternion(q).add(c))});
+ const size=bb.getSize(new THREE.Vector3()),k=SZ/Math.max(size.y,size.x*.9,size.z*.9,.01);
+ norm.scale.setScalar(k);norm.position.set(-(bb.min.x+bb.max.x)/2*k,-bb.min.y*k,-(bb.min.z+bb.max.z)/2*k);
+ const c={group,torso,face,style,rank,mats:[],disp:[],hit:[],arms:[],legs:[],horns:[],wings:[],tails:[],baseX:0,baseZ:0,baseRY:0,userSpin:0,phase:Math.random()*10,
+  ox:0,oy:0,oz:0,rz:0,spin:0,shake:0,flash:0,fc:[1,.15,0],ko:false,anim:newAnim(),height:size.y*k};
+ const bodyC=V3(parts[0].c),ol=style==='cute'?[3,'#5a4038']:style==='cool'?[5,'#120e0c']:null;
+ parts.forEach((pt,i)=>{
+  let fc=colorize(pt.fc,style),bc=colorize(pt.bc,style),w=pt.w,h=pt.h;
+  if(ol){const f2=outlineCv(fc,ol[0],ol[1]);w*=f2.width/fc.width;h*=f2.height/fc.height;fc=f2;bc=outlineCv(bc,ol[0],ol[1])}
+  const pm=partMeshes(w,h,fc,bc,style,puff,c.disp);
+  pm.ms.forEach(m=>{m.userData.c=c;c.hit.push(m)});c.mats.push(pm.F.mat,pm.B.mat);
+  const piv=V3(pt.p||pt.c),holder=new THREE.Group();holder.position.copy(piv);
+  pm.g.position.copy(V3(pt.c).sub(piv));pm.g.quaternion.copy(Q4(pt.q));holder.add(pm.g);norm.add(holder);
+  const r=i===0?'body':pt.r,s=Math.sign(piv.x-bodyC.x)||1;
+  if(r==='arm')c.arms.push({g:holder,s,i:c.arms.length});
+  if(r==='leg')c.legs.push({g:holder,x:piv.x});
+  if(r==='horn')c.horns.push({g:holder,i:c.horns.length});
+  if(r==='wing')c.wings.push({g:holder,s});
+  if(r==='tail')c.tails.push({g:holder,i:c.tails.length});
+ });
+ c.legs.sort((a,b)=>a.x-b.x).forEach((l,i)=>l.i=i);
+ if(rank>=2){const cr=makeCrown(c),b0=parts[0];cr.position.set((bodyC.x-(bb.min.x+bb.max.x)/2)*k,(b0.c[1]+b0.h*.42-bb.min.y)*k+.05,(bodyC.z-(bb.min.z+bb.max.z)/2)*k);cr.scale.setScalar(rank>=3?1.35:1);torso.add(cr)}
+ const sc=opt.scale||1;group.scale.setScalar(sc);c.height*=sc;c.bs=sc;c.sk=1;c.h0=c.height;
+ const bubble=new THREE.Mesh(new THREE.SphereGeometry(SZ*.62,28,18),new THREE.MeshStandardMaterial({color:'#5d9bff',transparent:true,opacity:.22,roughness:.2,depthWrite:false}));
+ bubble.position.y=c.height*.5/sc;bubble.visible=false;group.add(bubble);c.bubble=bubble;c.disp.push(bubble.geometry,bubble.material);
+ scene.add(group);return c;
+}
+/* まえから みた え（サムネイルと のうりょく けいさん よう） */
+function renderFront(parts,S){
+ S=S||640;const out=newCanvas(S),g=out.getContext('2d');if(!parts.length)return out;
+ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+ const items=parts.map(pt=>{const q=Q4(pt.q),c=V3(pt.c),P=(x,y)=>new THREE.Vector3(x,y,0).applyQuaternion(q).add(c);
+  const tl=P(-pt.w/2,pt.h/2),tr=P(pt.w/2,pt.h/2),bl=P(-pt.w/2,-pt.h/2),br=P(pt.w/2,-pt.h/2);
+  [tl,tr,bl,br].forEach(v=>{x0=Math.min(x0,v.x);y0=Math.min(y0,v.y);x1=Math.max(x1,v.x);y1=Math.max(y1,v.y)});
+  return{pt,tl,tr,bl,z:c.z,n:new THREE.Vector3(0,0,1).applyQuaternion(q)}});
+ const s=S*.9/Math.max(x1-x0,y1-y0,.01),ox=(S-(x1-x0)*s)/2,oy=(S-(y1-y0)*s)/2,T=v=>({X:(v.x-x0)*s+ox,Y:(y1-v.y)*s+oy});
+ items.sort((a,b)=>a.z-b.z).forEach(it=>{const img=it.n.z>=0?it.pt.fc:it.pt.bc,W=img.width,H=img.height,a=T(it.tl),b=T(it.tr),d=T(it.bl);
+  if(Math.abs((b.X-a.X)*(d.Y-a.Y)-(b.Y-a.Y)*(d.X-a.X))<6)return;
+  g.setTransform((b.X-a.X)/W,(b.Y-a.Y)/W,(d.X-a.X)/H,(d.Y-a.Y)/H,a.X,a.Y);g.drawImage(img,0,0)});
+ g.setTransform(1,0,0,1,0,0);return out;
+}
+
+/* ---------- エディタ ---------- */
+const ED={parts:[],group:null,env:null,yaw:0,pitch:.12,Y:0,P:.12,dist:8,ty:1.4,tool:'outline',mirror:true,acts:[],stamp:'eyes',size:14,ptrs:new Map(),ink:[],gest:null,paintLast:null,snaps:null};
+let cur3=PAL[0];
+const ROLEN={body:'からだ',arm:'うで',leg:'あし',horn:'つの',wing:'はね',tail:'しっぽ',none:'かざり'},ROLEC={body:'#ffffff',arm:'#ff8a2a',leg:'#2f6fd6',horn:'#9b59d0',wing:'#1fb5d6',tail:'#b5832f',none:'#a39b8f'};
+const ROLE_CYC=['arm','leg','horn','wing','tail','none'];
+function edEnsure(){
+ if(ED.group||!HAS3D)return;ED.group=new THREE.Group();scene.add(ED.group);
+ const env=new THREE.Group(),grid=new THREE.GridHelper(10,20,0xb8ad99,0xe2d9c8);grid.position.y=.002;env.add(grid);
+ const disc=new THREE.Mesh(new THREE.CircleGeometry(5,48),new THREE.MeshStandardMaterial({color:'#f3ecdc',roughness:1}));disc.rotation.x=-Math.PI/2;disc.receiveShadow=true;env.add(disc);
+ const line=(a,b,col)=>new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(a),V3(b)]),new THREE.LineBasicMaterial({color:col}));
+ env.add(line([-5,.01,0],[5,.01,0],0xe0452f),line([0,.01,-5],[0,.01,5],0x2f6fd6),line([0,0,0],[0,4.6,0],0x3a9e4b));
+ const lab=(t,col,pos)=>{const c=newCanvas(64),g=c.getContext('2d');g.fillStyle=col;g.font='900 34px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(t,32,34);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));s.scale.setScalar(.55);s.position.copy(V3(pos));return s};
+ env.add(lab('まえ','#2f6fd6',[0,.3,4.6]),lab('うしろ','#2f6fd6',[0,.3,-4.6]),lab('みぎ','#e0452f',[4.6,.3,0]),lab('ひだり','#e0452f',[-4.6,.3,0]));
+ ED.env=env;scene.add(env);env.visible=false;ED.group.visible=false;
+}
+function edBuild(pt){
+ if(pt.obj){ED.group.remove(pt.obj);(pt.disp||[]).forEach(d=>d.dispose())}pt.disp=[];
+ const pm=partMeshes(pt.w,pt.h,pt.fc,pt.bc,'none',1,pt.disp);pm.g.position.copy(pt.c);pm.g.quaternion.copy(pt.q);
+ pm.ms.forEach(m=>m.userData.pt=pt);pt.obj=pm.g;pt.ms=pm.ms;pt.F=pm.F;pt.B=pm.B;ED.group.add(pm.g);edTint(pt);
+}
+function edRemove(pt){ED.group.remove(pt.obj);(pt.disp||[]).forEach(d=>d.dispose());pt.obj=null;const i=ED.parts.indexOf(pt);if(i>=0)ED.parts.splice(i,1)}
+function edTint(pt){const role=ED.parts[0]===pt?'body':pt.r,on=ED.tool==='role',col=new THREE.Color(on?ROLEC[role]:'#000000');
+ [pt.F,pt.B].forEach(x=>x&&x.mat.emissive.copy(col).multiplyScalar(on?.45:0))}
+function edBasis(){camera.updateMatrixWorld(true);const e=camera.matrixWorld;
+ return{R:new THREE.Vector3().setFromMatrixColumn(e,0).normalize(),U:new THREE.Vector3().setFromMatrixColumn(e,1).normalize(),N:new THREE.Vector3().setFromMatrixColumn(e,2).normalize()}}
+const rc3=HAS3D?new THREE.Raycaster():null;
+function ndc3(x,y){const r=$('d3Ink').getBoundingClientRect();return new THREE.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1)}
+function edHit(x,y){camera.updateMatrixWorld(true);rc3.setFromCamera(ndc3(x,y),camera);const ms=[];ED.parts.forEach(p=>ms.push(...p.ms));return rc3.intersectObjects(ms,false)[0]||null}
+function rayPlane(x,y,P0,N){rc3.setFromCamera(ndc3(x,y),camera);const v=new THREE.Vector3();return rc3.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(N,P0),v)?v:null}
+function worldPerPx(P){const N=edBasis().N,d=-P.clone().sub(camera.position).dot(N);return 2*d*Math.tan(camera.fov*Math.PI/360)/($('d3Ink').getBoundingClientRect().height||1)}
+function mirrorPart(pt){
+ const S=new THREE.Matrix4().makeScale(-1,1,1),M=new THREE.Matrix4().makeRotationFromQuaternion(pt.q),q=new THREE.Quaternion().setFromRotationMatrix(S.clone().multiply(M).multiply(S));
+ return{fc:flipCv(pt.fc),bc:flipCv(pt.bc),w:pt.w,h:pt.h,c:new THREE.Vector3(-pt.c.x,pt.c.y,pt.c.z),q,p:new THREE.Vector3(-pt.p.x,pt.p.y,pt.p.z),r:pt.r};
+}
+function autoRole(pt,closed){
+ const b=ED.parts[0];if(!b)return'body';
+ const v=closed?pt.c.clone().sub(b.c):pt.c.clone().sub(pt.p), // とじた かたちは からだの まんなかから みた むきで きめる
+ ax=Math.abs(v.x),ay=Math.abs(v.y),az=Math.abs(v.z),bc=b.c,p=pt.p,big=pt.w*pt.h>b.w*b.h*.28;
+ if(pt.w*pt.h<b.w*b.h*.08&&Math.abs(pt.c.x-bc.x)<b.w*.42&&Math.abs(pt.c.y-bc.y)<b.h*.42)return'none'; // からだの うえの ちいさな かざり（め・はな）
+ if(v.z<0&&az>Math.max(ax,ay)*.8)return'tail';
+ if(v.y<0&&ay>ax&&p.y<bc.y)return'leg';
+ if(v.y>0&&ay>ax*1.2&&p.y>bc.y+b.h*.1)return big?'wing':'horn';
+ if(big&&p.y>bc.y)return'wing';
+ if(ax>=ay*.8)return'arm';
+ return'none';
+}
+function edMakePart(pts){
+ if(pts.length<4)return;
+ const {R,U,N}=edBasis(),hit=edHit(pts[0].x,pts[0].y),P0=hit?hit.point.clone():new THREE.Vector3(0,ED.ty,0),side=Math.abs(N.x)>.85;
+ if(side)P0.x=ED.parts[0]?ED.parts[0].c.x:0; // よこから かいた ものは まんなかの めんに おく（しっぽ・はな など）
+ const L=[];for(const p of pts){const w=rayPlane(p.x,p.y,P0,N);if(w){const d=w.sub(P0);L.push([d.dot(R),d.dot(U)])}}
+ if(L.length<4)return;
+ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;L.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});
+ const diag=Math.hypot(x1-x0,y1-y0);if(diag<.06)return;
+ const closed=Math.hypot(L[0][0]-L[L.length-1][0],L[0][1]-L[L.length-1][1])<diag*.35;
+ const lw=closed?0:Math.max(ED.size*1.4,12)*worldPerPx(P0),pad=lw/2+diag*.04;
+ x0-=pad;y0-=pad;x1+=pad;y1+=pad;
+ const w=x1-x0,h=y1-y0,ppu=220/Math.max(w,h),W=Math.max(8,Math.ceil(w*ppu)),H=Math.max(8,Math.ceil(h*ppu));
+ const cv=newCanvas(W,H),g=cv.getContext('2d');g.lineCap=g.lineJoin='round';
+ const X=x=>(x-x0)*ppu,Y=y=>(y1-y)*ppu;
+ g.beginPath();g.moveTo(X(L[0][0]),Y(L[0][1]));
+ for(let i=1;i<L.length-1;i++){g.quadraticCurveTo(X(L[i][0]),Y(L[i][1]),X((L[i][0]+L[i+1][0])/2),Y((L[i][1]+L[i+1][1])/2))}
+ g.lineTo(X(L[L.length-1][0]),Y(L[L.length-1][1]));
+ const olw=clamp(Math.min(W,H)*.045,3,7);
+ if(closed){g.closePath();g.fillStyle=cur3.hex;g.fill();g.strokeStyle=K;g.lineWidth=olw;g.stroke()}
+ else{g.strokeStyle=K;g.lineWidth=lw*ppu+olw*2;g.stroke();g.strokeStyle=cur3.hex;g.lineWidth=lw*ppu;g.stroke()}
+ const C=P0.clone().addScaledVector(R,(x0+x1)/2).addScaledVector(U,(y0+y1)/2);
+ let piv=hit?P0.clone():C.clone();
+ if(closed&&ED.parts.length){const bc=ED.parts[0].c;let bd=1e9;L.forEach(([x,y])=>{const w3=P0.clone().addScaledVector(R,x).addScaledVector(U,y),d=w3.distanceTo(bc);if(d<bd){bd=d;piv=w3}})} // からだに いちばん ちかい ところが かんせつ
+ const pt={fc:cv,bc:copyCv(cv),w,h,c:C,q:camera.quaternion.clone(),p:piv,r:'none'};
+ pt.r=ED.parts.length?autoRole(pt,closed):'body';
+ const add=[pt];
+ if(ED.mirror&&ED.parts.length&&!side&&pt.r!=='tail'&&Math.abs(C.x)>.15){const tw=mirrorPart(pt);pt.twin=tw;tw.twin=pt;add.push(tw)}
+ add.forEach(p=>{ED.parts.push(p);edBuild(p)});
+ ED.acts.push({t:'add',parts:add});se('pon');
+ edMsg(ED.parts.length===add.length?'からだが できた！ まわして いろんな むきから パーツを かきたそう':`${ROLEN[pt.r]} が できた！${add.length>1?'（はんたいがわにも）':''} ちがったら「やくわり」で かえてね`);
+ edSync();
+}
+/* りったいの ひょうめんに かく */
+function snapPart(pt){if(!ED.snaps)return;if(ED.snaps.some(s=>s.pt===pt))return;
+ ED.snaps.push({pt,f:pt.fc.getContext('2d').getImageData(0,0,pt.fc.width,pt.fc.height),b:pt.bc.getContext('2d').getImageData(0,0,pt.bc.width,pt.bc.height)})}
+function texUp(pt){[pt.F,pt.B].forEach(x=>{if(!x)return;const t=x.tex;if(t._src)bleedInto(t.image,t._src);t.needsUpdate=true})}
+function mirrorTargets(pt){const out=[];if(!ED.mirror)return out;if(pt.twin)out.push(pt.twin);
+ else{const n=new THREE.Vector3(0,0,1).applyQuaternion(pt.q);if(Math.abs(pt.c.x)<.12&&Math.abs(n.x)<.35)out.push(pt)}return out}
+function paintAt(pt,sd,u,v,lu,lv,r){
+ const cv=sd==='f'?pt.fc:pt.bc,g=cv.getContext('2d');snapPart(pt);
+ g.save();g.globalCompositeOperation='source-atop';g.strokeStyle=cur3.hex;g.fillStyle=cur3.hex;g.lineCap='round';g.lineWidth=r*2;
+ if(lu!=null){g.beginPath();g.moveTo(lu,lv);g.lineTo(u,v);g.stroke()}else{g.beginPath();g.arc(u,v,r,0,7);g.fill()}
+ g.restore();texUp(pt);
+}
+function edPaint(x,y){
+ const h=edHit(x,y);if(!h||!h.uv){ED.paintLast=null;return}
+ const pt=h.object.userData.pt,sd=h.object.userData.side,cv=sd==='f'?pt.fc:pt.bc,W=cv.width,u=h.uv.x*W,v=(1-h.uv.y)*cv.height;
+ const r=Math.max(1.5,ED.size*worldPerPx(h.point)*(W/pt.w)/2),L=ED.paintLast,same=L&&L.pt===pt&&L.sd===sd;
+ paintAt(pt,sd,u,v,same?L.u:null,same?L.v:null,r);
+ mirrorTargets(pt).forEach(t=>{const tw=t.fc.width;if(t===pt&&Math.abs(u-W/2)<r)return;paintAt(t,sd,tw-u*(tw/W),v,same?tw-L.u*(tw/W):null,same?L.v:null,r)});
+ ED.paintLast={pt,sd,u,v};
+}
+function edStamp(x,y){
+ const h=edHit(x,y);if(!h||!h.uv)return;ED.snaps=[];
+ const pt=h.object.userData.pt,sd=h.object.userData.side,cv=sd==='f'?pt.fc:pt.bc,W=cv.width,u=h.uv.x*W,v=(1-h.uv.y)*cv.height;
+ const d=DEF_SIZE[ED.stamp]||[64,64],sc=worldPerPx(h.point)*(W/pt.w)*.9,sw=d[0]*sc,sh=d[1]*sc;
+ const put=(t,cu)=>{snapPart(t);const g=(sd==='f'?t.fc:t.bc).getContext('2d');g.save();g.globalCompositeOperation='source-atop';drawStamp(g,ED.stamp,cu-sw/2,v-sh/2,cu+sw/2,v+sh/2,cur3.hex);g.restore();texUp(t)};
+ put(pt,u);if(ED.stamp!=='eyes')mirrorTargets(pt).forEach(t=>{if(t===pt&&Math.abs(u-W/2)<sw*.3)return;put(t,t.fc.width-u)});
+ ED.acts.push({t:'paint',snaps:ED.snaps});ED.snaps=null;se('tap');edSync();
+}
+function domColor(cv){const d=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data,cnt={};let best=null,bn=0;
+ for(let i=0;i<d.length;i+=16){if(d[i+3]<200)continue;const l=d[i]+d[i+1]+d[i+2];if(l<150)continue;const k=(d[i]>>4)+'-'+(d[i+1]>>4)+'-'+(d[i+2]>>4);cnt[k]=(cnt[k]||0)+1;if(cnt[k]>bn){bn=cnt[k];best=[d[i],d[i+1],d[i+2]]}}return best}
+function recolor(pt,from){[pt.fc,pt.bc].forEach(cv=>{const g=cv.getContext('2d'),img=g.getImageData(0,0,cv.width,cv.height),d=img.data,[r,gg,b]=cur3.rgb;
+ for(let i=0;i<d.length;i+=4){if(!d[i+3])continue;if(Math.abs(d[i]-from[0])+Math.abs(d[i+1]-from[1])+Math.abs(d[i+2]-from[2])<90){d[i]=r;d[i+1]=gg;d[i+2]=b}}g.putImageData(img,0,0)});texUp(pt)}
+function edFill(x,y){const h=edHit(x,y);if(!h)return;const pt=h.object.userData.pt,from=domColor(pt.fc);if(!from)return;ED.snaps=[];
+ [pt].concat(ED.mirror&&pt.twin?[pt.twin]:[]).forEach(t=>{snapPart(t);recolor(t,from)});ED.acts.push({t:'paint',snaps:ED.snaps});ED.snaps=null;se('good');edSync()}
+function edRole(x,y){const h=edHit(x,y);if(!h)return;const pt=h.object.userData.pt;
+ if(ED.parts[0]===pt){edMsg('いちばん さいしょの パーツは「からだ」だよ');return}
+ const prev=pt.r,nx=ROLE_CYC[(ROLE_CYC.indexOf(prev)+1)%ROLE_CYC.length],list=[pt].concat(pt.twin?[pt.twin]:[]);
+ list.forEach(t=>{t.r=nx;edTint(t)});ED.acts.push({t:'role',list,prev});edMsg(`「${ROLEN[nx]}」に したよ`);se('tap');edSync()}
+function edErase(x,y){const h=edHit(x,y);if(!h)return;const pt=h.object.userData.pt,list=[pt].concat(pt.twin&&ED.parts.includes(pt.twin)?[pt.twin]:[]);
+ const idx=list.map(t=>ED.parts.indexOf(t));list.forEach(edRemove);ED.acts.push({t:'del',list,idx});ED.parts.forEach(edTint);se('miss');edMsg('パーツを けしたよ（もどす で もどせる）');edSync()}
+function edUndo(){const a=ED.acts.pop();if(!a)return;
+ if(a.t==='add')a.parts.forEach(edRemove);
+ else if(a.t==='paint')a.snaps.forEach(s=>{s.pt.fc.getContext('2d').putImageData(s.f,0,0);s.pt.bc.getContext('2d').putImageData(s.b,0,0);texUp(s.pt)});
+ else if(a.t==='role')a.list.forEach(t=>{t.r=a.prev;edTint(t)});
+ else if(a.t==='del')a.list.map((t,i)=>[t,a.idx[i]]).sort((p,q)=>p[1]-q[1]).forEach(([t,i])=>{ED.parts.splice(i,0,t);edBuild(t)});
+ ED.parts.forEach(edTint);edSync();se('tap');
+}
+/* --- UI --- */
+function edMsg(t,warn){const m=$('d3Msg');m.textContent=t;m.style.background=warn?'#ffe1e1':''}
+const ED_HINT={outline:'かこむと ぷっくり パーツ、せんだけなら ぼうに なるよ。からだの うえから かきはじめると くっつく',paint:'りったいの うえに もようを かけるよ',stamp:'タッチした ところに スタンプ',
+ fill:'パーツを タッチすると いろが かわる',role:'パーツを タッチすると やくわりが かわる（いろで わかるよ）',erase:'タッチした パーツを けす',rotate:'ゆびで うごかして まわそう'};
+const d3T=$('d3Tools'),d3R=$('d3Rot');
+const ICON3={brush:c=>SV(`<path d="M20 4l8 8-10 10-8-8z" fill="#fbf8ef"/><path d="M10 14l-4 4c-3 3-2 8-2 8s5 1 8-2l4-4" fill="${c}"/>`),
+ tag:()=>SV(`<path d="M4 16V5h11l13 13-11 11z" fill="#ffe27a"/><circle cx="10" cy="11" r="2.4" fill="#fbf8ef"/>`),
+ rot:()=>SV(`<path d="M6 16a10 10 0 1 0 3-7"/><path d="M9 3v6h6"/>`),
+ outline:c=>SV(`<path d="M6 20c-2-8 6-15 13-12s7 13 0 16-11 2-13-4z" fill="${c}"/><path d="M24 24l5 5"/>`)};
+const d3g1=grp(d3T),d3g2=grp(d3T);
+const d3b={outline:tbtn(d3g1,'りんかく','',()=>edTool('outline')),paint:tbtn(d3g1,'もよう','',()=>edTool('paint')),stamp:tbtn(d3g1,'スタンプ','',()=>edTool('stamp')),
+ fill:tbtn(d3g1,'ぬる','',()=>edTool('fill')),role:tbtn(d3g2,'やくわり',ICON3.tag(),()=>edTool('role')),erase:tbtn(d3g2,'けす',ICON.eraser(),()=>edTool('erase')),rotate:tbtn(d3g2,'まわす',ICON3.rot(),()=>edTool('rotate'))};
+const d3row=document.createElement('div');d3row.className='tb';d3row.style.width='100%';d3T.appendChild(d3row);
+const d3g3=grp(d3row),d3Sz=[[8,'ほそ',4],[14,'ふつう',7],[24,'ふと',11]].map(([v,l,r])=>{const b=tbtn(d3g3,l,'',()=>{ED.size=v;edSync()});b.dataset.v=v;b.dataset.r=r;return b});
+const d3Mir=tbtn(d3row,'たいしょう',ICON.mirror(),()=>{ED.mirror=!ED.mirror;edSync()});
+const d3Undo=tbtn(d3row,'もどす',ICON.undo(),()=>edUndo());
+[['⟲','ひだりへ',()=>{ED.Y+=Math.PI/4}],['まえ','しょうめん',()=>{ED.Y=0;ED.P=.12}],['よこ','よこから',()=>{ED.Y=Math.PI/2;ED.P=.12}],['うしろ','うしろから',()=>{ED.Y=Math.PI;ED.P=.12}],['うえ','うえから',()=>{ED.P=ED.P>.8?.12:1.1}],['⟳','みぎへ',()=>{ED.Y-=Math.PI/4}]]
+ .forEach(([t,l,f])=>{const b=document.createElement('button');b.className='rbt';b.textContent=t;b.setAttribute('aria-label',l);b.onclick=f;d3R.appendChild(b)});
+PAL.forEach((c,i)=>{const b=document.createElement('button');b.className='crayon';b.style.background=c.hex;b.setAttribute('aria-label',c.name);b.dataset.i=i;
+ b.onclick=()=>{cur3=c;if(ED.tool==='role'||ED.tool==='erase'||ED.tool==='rotate')edTool('outline');else edSync()};$('d3Pal').appendChild(b)});
+STAMPS.forEach(([k,l])=>{const b=document.createElement('button');b.className='stp';b.dataset.k=k;b.innerHTML=`<img alt="" src=""><span>${l}</span>`;b.onclick=()=>{ED.stamp=k;edSync()};$('d3Stamps').appendChild(b)});
+function edTool(t){ED.tool=t;ED.parts.forEach(edTint);edSync()}
+function edSync(){
+ for(const k in d3b)d3b[k].setAttribute('aria-pressed',ED.tool===k);
+ setIcon(d3b.outline,ICON3.outline(cur3.hex));setIcon(d3b.paint,ICON3.brush(cur3.hex));setIcon(d3b.stamp,ICON.stamp(cur3.hex));setIcon(d3b.fill,ICON.fill(cur3.hex));
+ d3Sz.forEach(b=>{setIcon(b,ICON.size(cur3.hex,b.dataset.r));b.setAttribute('aria-pressed',+b.dataset.v===ED.size);b.disabled=!(ED.tool==='paint'||ED.tool==='outline')});
+ d3Mir.setAttribute('aria-pressed',ED.mirror);d3Undo.disabled=!ED.acts.length;
+ $('d3Pal').querySelectorAll('.crayon').forEach(b=>b.setAttribute('aria-pressed',PAL[b.dataset.i]===cur3));
+ $('d3Stamps').hidden=ED.tool!=='stamp';
+ if(ED.tool==='stamp')$('d3Stamps').querySelectorAll('.stp').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.k===ED.stamp);const im=b.querySelector('img'),k=b.dataset.k+cur3.hex;
+  if(im.dataset.k!==k){const c=newCanvas(64),g=c.getContext('2d'),pd={eyes:[6,18,58,46],smile:[10,18,54,44],fang:[8,16,56,46],open:[12,14,52,50]}[b.dataset.k]||[10,10,54,54];drawStamp(g,b.dataset.k,pd[0],pd[1],pd[2],pd[3],cur3.hex);im.src=c.toDataURL();im.dataset.k=k}});
+ $('d3Hint').textContent=ED.parts.length?ED_HINT[ED.tool]:'まずは まんなかに からだを かこんで かこう（2本指で まわす・ズーム）';
+}
+function edResize(){const ink=$('d3Ink'),r=ink.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);ink.width=Math.max(1,r.width*d);ink.height=Math.max(1,r.height*d)}
+window.addEventListener('resize',()=>{if(!$('sDraw3d').hidden)edResize()});
+function inkDraw(){const ink=$('d3Ink'),g=ink.getContext('2d'),r=ink.getBoundingClientRect(),s=ink.width/(r.width||1);g.clearRect(0,0,ink.width,ink.height);
+ if(ED.ink.length<2)return;g.lineCap=g.lineJoin='round';g.strokeStyle=K;g.lineWidth=7*s;g.beginPath();ED.ink.forEach((p,i)=>{const x=(p.x-r.left)*s,y=(p.y-r.top)*s;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
+ g.strokeStyle=cur3.hex;g.lineWidth=4*s;g.stroke()}
+{const ink=$('d3Ink');
+ ink.addEventListener('pointerdown',e=>{e.preventDefault();ink.setPointerCapture(e.pointerId);ED.ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ED.ptrs.size===2){ED.ink=[];inkDraw();ED.paintLast=null;if(ED.snaps&&ED.snaps.length)ED.acts.push({t:'paint',snaps:ED.snaps});ED.snaps=null;
+   const [a,b]=[...ED.ptrs.values()];ED.gest={mx:(a.x+b.x)/2,my:(a.y+b.y)/2,d:Math.hypot(a.x-b.x,a.y-b.y)||1,Y:ED.Y,P:ED.P,dist:ED.dist};return}
+  if(ED.ptrs.size>2||ED.gest)return;
+  const t=ED.tool;ED.down={x:e.clientX,y:e.clientY,Y:ED.Y,P:ED.P};
+  if(t==='outline'){ED.ink=[{x:e.clientX,y:e.clientY}];inkDraw()}
+  else if(t==='paint'){ED.snaps=[];ED.paintLast=null;edPaint(e.clientX,e.clientY)}
+ });
+ ink.addEventListener('pointermove',e=>{if(!ED.ptrs.has(e.pointerId))return;ED.ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ED.gest&&ED.ptrs.size>=2){const [a,b]=[...ED.ptrs.values()],mx=(a.x+b.x)/2,my=(a.y+b.y)/2,d=Math.hypot(a.x-b.x,a.y-b.y)||1;
+   ED.Y=ED.gest.Y-(mx-ED.gest.mx)*.012;ED.P=clamp(ED.gest.P+(my-ED.gest.my)*.008,-.35,1.25);ED.dist=clamp(ED.gest.dist*ED.gest.d/d,4,14);return}
+  if(!ED.down)return;
+  if(ED.tool==='outline'){const l=ED.ink[ED.ink.length-1];if(Math.hypot(e.clientX-l.x,e.clientY-l.y)>2){ED.ink.push({x:e.clientX,y:e.clientY});inkDraw()}}
+  else if(ED.tool==='paint')edPaint(e.clientX,e.clientY);
+  else if(ED.tool==='rotate'){ED.Y=ED.down.Y-(e.clientX-ED.down.x)*.012;ED.P=clamp(ED.down.P+(e.clientY-ED.down.y)*.008,-.35,1.25)}
+ });
+ ['pointerup','pointercancel'].forEach(tp=>ink.addEventListener(tp,e=>{
+  const dn=ED.down;ED.ptrs.delete(e.pointerId);
+  if(ED.gest){if(!ED.ptrs.size)ED.gest=null;ED.down=null;return}
+  if(dn&&tp==='pointerup'){const t=ED.tool,tap=Math.hypot(e.clientX-dn.x,e.clientY-dn.y)<10;
+   if(t==='outline'){const pts=ED.ink;ED.ink=[];inkDraw();edMakePart(pts)}
+   else if(t==='paint'){if(ED.snaps&&ED.snaps.length)ED.acts.push({t:'paint',snaps:ED.snaps});ED.snaps=null;ED.paintLast=null;edSync()}
+   else if(tap&&t==='stamp')edStamp(e.clientX,e.clientY);
+   else if(tap&&t==='fill')edFill(e.clientX,e.clientY);
+   else if(tap&&t==='role')edRole(e.clientX,e.clientY);
+   else if(tap&&t==='erase')edErase(e.clientX,e.clientY);
+  }else{ED.ink=[];inkDraw()}
+  ED.down=null;
+ }));
+ ink.addEventListener('wheel',e=>{e.preventDefault();ED.dist=clamp(ED.dist*(e.deltaY<0?.9:1.1),4,14)},{passive:false});
+}
+async function open3D(m){
+ if(!HAS3D){startDraw(m,true);return}
+ edEnsure();ED.parts.slice().forEach(edRemove);ED.parts=[];ED.acts=[];ED.Y=ED.yaw=0;ED.P=ED.pitch=.12;ED.dist=8;ED.tool='outline';ED.ink=[];
+ editing=m||null;
+ if(m&&m.parts){for(const sp of m.parts){const fc=await urlCv(sp.f)||newCanvas(8),bc=await urlCv(sp.b||sp.f)||copyCv(fc);ED.parts.push({fc,bc,w:sp.w,h:sp.h,c:V3(sp.c),q:Q4(sp.q),p:V3(sp.p),r:sp.r})}
+  m.parts.forEach((sp,i)=>{if(sp.tw!=null&&ED.parts[sp.tw])ED.parts[i].twin=ED.parts[sp.tw]});ED.parts.forEach(edBuild);$('d3Name').value=m.name}
+ else $('d3Name').value='';
+ edMsg(m?'かきたし できるよ。パーツを ふやしたり もようを かいたり しよう':'');
+ $('d3Back').textContent=save.mons.length?'← ぼくじょう':'← もどる';
+ show('sDraw3d');edResize();edSync();
+}
+$('d3Back').onclick=()=>save.mons.length?showHome():show('sChoose');
+$('d3NmAuto').onclick=()=>{if(!ED.parts.length){edMsg('さきに えを かいてね',1);return}const d=edPack();$('d3Name').value=genName(d.base);se('good')};
+function edPack(){
+ const parts=ED.parts.map((p,i)=>({fc:p.fc,bc:p.bc,w:p.w,h:p.h,c:p.c.toArray(),q:p.q.toArray(),p:p.p.toArray(),r:i===0?'body':p.r,tw:p.twin?ED.parts.indexOf(p.twin):null}));
+ parts.forEach(p=>{if(p.tw<0)p.tw=null});
+ const src=renderFront(parts),det={comps:parts.slice(1).filter(p=>p.r!=='none').map(p=>({type:p.r}))},base=withShape(makeStats(analyze(src)),det,src);
+ return{parts,src,det,base};
+}
+$('d3Done').onclick=()=>{
+ if(!ED.parts.length){edMsg('まずは からだを かこんで かいてね',1);return}
+ const d=edPack();
+ pend={kind:'3d',parts:d.parts,src:d.src,back:null,det:d.det,base:d.base,name:$('d3Name').value.trim()||genName(d.base),style:editing?editing.style:'cute'};
+ showCard();
+};
+$('chEasy').onclick=()=>startDraw(null,true);
+$('ch3d').onclick=()=>open3D(null);
+$('chBack').onclick=()=>showHome();
 
 /* ================= バトル（じゃんけん） ================= */
 let P=null,E=null,stage=1,busy=false;
@@ -1850,7 +2392,7 @@ function handPower(u,h){return h==='g'?u.atk*1.3+5:h==='c'?u.atk*.8+u.spd*.95:u.
 const ultPower=u=>Math.max(handPower(u,'g'),handPower(u,'c'),handPower(u,'p'))*2.1;
 function typeMul(a,d){return BEATS[a.el].includes(d.el)?1.5:BEATS[d.el].includes(a.el)?.7:1}
 function calc(a,d,base,o){o=o||{};
- const tm=o.type?typeMul(a,d):1,crit=Math.random()<.08+(a.love||0)/1000;
+ const tm=o.type?typeMul(a,d):1,crit=Math.random()<.08+(a.love||0)/1000+(a.crit||0);
  let dmg=Math.max(3,Math.round((base*rnd(.9,1.1)-d.def*.4)*tm*(crit?1.5:1)*(o.mult||1)*(o.defm||1)));
  let guts=false;
  if(d.hp-dmg<=0&&d.love&&!d.gutsUsed&&d.hp>1&&Math.random()<d.love/400){dmg=d.hp-1;d.gutsUsed=true;guts=true}
@@ -1935,7 +2477,7 @@ async function round(ph){
 async function startBattle(){
  const m=curMon();if(!m||!B)return;stage=B.lvl;
  const st=statsOf(m);
- P={name:fullName(m),el:st.el,maxhp:st.maxhp,atk:st.atk,def:st.def,spd:st.spd,love:m.love,gutsUsed:false,gauge:0};
+ P={name:fullName(m),el:st.el,maxhp:st.maxhp,atk:st.atk,def:st.def,spd:st.spd,crit:m.base.crit||0,love:m.love,gutsUsed:false,gauge:0};
  E=B.E0;B.E0=null;if(!E||E.used)E=makeEnemy(B.lvl,B.boss?{type:AREAS[B.area].boss.type,boss:true,name:AREAS[B.area].boss.name}:{type:B.tower?pick(Object.keys(ETYPES).filter(k=>k!=='king')):pick(AREAS[B.area].types)});
  E.used=true;B.E0=E;E.love=0;E.gauge=0;E.fav=pick(['g','c','p']);E.img=E.src.toDataURL('image/png');E.gutsUsed=false;
  P.hp=P.maxhp;E.hp=E.maxhp;
