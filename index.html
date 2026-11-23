@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fbf8ef">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="クレヨン牧場">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>クレヨン牧場</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
@@ -342,6 +350,77 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
 .d3hint{position:absolute;left:8px;right:8px;bottom:8px;z-index:3;pointer-events:none;font-size:12px;font-weight:900;text-align:center;background:#fffdf6e6;border:2px solid var(--ink);border-radius:10px;padding:4px 8px;line-height:1.4}
 .rotrow{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .rbt{font-size:13px;padding:8px 0;box-shadow:2px 2px 0 var(--ink);min-width:0;white-space:nowrap}
+
+/* ===== タブレット：スクロールしないで つかえる ならび ===== */
+.sideCol{display:contents}
+.cardSide,.batMain,.batSide{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (min-width:700px){
+ .wrap{max-width:none;padding-block:10px}
+ body:not([data-scr="sHome"]) header{display:none}
+ #sList,#sRes,#sChoose{width:min(640px,100%);margin:0 auto}
+ #sStory,#sMap{width:min(1100px,100%);margin:0 auto}
+ .storyView{height:calc(100svh - 40px)}
+ #homeView{height:calc(100svh - 20px);max-height:none}
+ .tgrp{flex-wrap:wrap}
+ .tbtn{width:58px;min-height:62px}
+ .tbtn svg{width:32px;height:32px}
+ .tbtn span{font-size:10.5px}
+ .crayon{width:52px;height:52px}
+ .pal .crayon{max-width:54px}
+ .rbt{font-size:15px;padding:12px 0}
+ .hand{padding:12px 4px 14px}
+ .hand svg{width:72px;height:72px}
+}
+/* よこむき タブレット */
+@media (min-width:900px) and (orientation:landscape) and (min-height:560px){
+ .wrap{padding-block:10px}
+ /* かんたん かく */
+ #sDraw{display:grid;--side:minmax(220px,250px);grid-template-columns:var(--side) auto var(--side);column-gap:18px;row-gap:10px;justify-content:center;align-content:start;
+  grid-template-rows:auto auto 1fr auto;grid-template-areas:"back tabs ." "left pad pal" "left pad right" ". hint .";--padw:min(calc(100svh - 160px),calc(100vw - 600px))}
+ #sDraw>*{align-self:start}
+ .sideCol{display:contents}
+ #dL,#dR,#d3L,#d3R{display:flex;flex-direction:column;gap:10px;min-width:0}
+ #sDraw>#dBack{grid-area:back;align-self:end}#sideTabs{grid-area:tabs;width:var(--padw)}#pad{grid-area:pad;width:var(--padw)}
+ #phint{grid-area:hint;width:var(--padw)}#tools{grid-area:pal}#dL{grid-area:left}#dR{grid-area:right}#sDraw>.note{display:none}
+ #stamps{grid-template-columns:repeat(4,1fr)}
+ #sDraw .pal{grid-template-columns:repeat(4,1fr)}
+ /* くるくる3D */
+ #sDraw3d{display:grid;--side:minmax(220px,250px);grid-template-columns:var(--side) auto var(--side);column-gap:18px;row-gap:10px;justify-content:center;align-content:start;
+  grid-template-rows:auto auto 1fr;grid-template-areas:"top top top" "left view rot" "left view right";--vw3:min(calc(100svh - 100px),calc(100vw - 600px))}
+ #sDraw3d>*{align-self:start}
+ #sDraw3d>.mapTop{grid-area:top}#d3View{grid-area:view;width:var(--vw3)}#d3Rot{grid-area:rot;grid-template-columns:repeat(3,1fr)}#d3Rot button{padding:8px 0;min-height:0}#d3L{grid-area:left}#d3R{grid-area:right}
+ #d3Stamps{grid-template-columns:repeat(4,1fr)}
+ #d3Pal{grid-template-columns:repeat(5,1fr);gap:6px}#d3Pal .crayon{width:42px;height:42px}
+ /* かくにん */
+ #sCard{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,1fr);gap:16px;height:calc(100svh - 32px)}
+ #sCard .cardSide>.row{position:sticky;bottom:0;background:var(--paper,#fbf7ee);padding-top:8px;margin-top:auto}
+ #cardView{height:100%!important}
+ #sCard .cardSide{overflow:auto;padding:2px 6px 6px 2px}
+ /* ちず */
+ #sMap{display:grid;grid-template-columns:auto minmax(220px,320px);grid-template-areas:"top top" "map hint";gap:14px;justify-content:center;align-items:start}
+ #sMap>.mapTop{grid-area:top}#map{grid-area:map;width:min(calc(100svh - 100px),calc(100vw - 380px))}#mapHint{grid-area:hint}
+ /* バトル */
+ #sBattle{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,400px);gap:16px;height:calc(100svh - 32px)}
+ #arenaView{height:calc(100svh - 100px)!important;min-height:0}
+ #sBattle .batSide{justify-content:flex-end;overflow:auto}
+ #sBattle .batSide .log{min-height:70px}
+}
+/* たてむき タブレット */
+@media (min-width:700px) and (orientation:portrait){
+ #sDraw{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:10px;
+  grid-template-areas:"back tabs" "pad pad" "hint hint" "tools pal" "stamps legend" "tools3 nm" "msg go";--padw:min(calc(100vw - 40px),calc(100svh - 620px))}
+ #sDraw>#dBack{grid-area:back}#sideTabs{grid-area:tabs;width:calc(var(--padw) * .6);justify-self:end}#pad{grid-area:pad;width:var(--padw);justify-self:center}
+ #phint{grid-area:hint}#tools{grid-area:pal}#tools2{grid-area:tools}#stamps{grid-area:stamps}#tools3{grid-area:tools3}#legend{grid-area:legend}
+ #sDraw .nmrow{grid-area:nm}#dmsg{grid-area:msg}#go{grid-area:go}#sDraw>.note{display:none}
+ #sDraw3d{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:10px;grid-template-areas:"top top" "view view" "rot rot" "tools pal" "stamps msg" "nm go"}
+ #sDraw3d>.mapTop{grid-area:top}#d3View{grid-area:view;width:min(calc(100vw - 40px),calc(100svh - 580px));justify-self:center}#d3Rot{grid-area:rot}#d3Tools{grid-area:tools}#d3Stamps{grid-area:stamps}
+ #d3Pal{grid-area:pal}#d3Msg{grid-area:msg}#sDraw3d .nmrow{grid-area:nm}#d3Done{grid-area:go}
+ #cardView{height:min(50svh,600px)!important}
+ #sCard .cardSide{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+ #sCard .cardSide>.row,#sCard .cardSide>.msg{grid-column:1/-1}
+ #arenaView{height:min(56svh,660px)!important}
+ #map{width:min(calc(100vw - 40px),calc(100svh - 230px));margin:0 auto}
+}
 </style>
 </head>
 <body>
@@ -443,12 +522,16 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
     <div class="mapTop"><button class="back" id="d3Back">← ぼくじょう</button><div class="ttl">くるくる3D</div><span></span></div>
     <div class="d3view" id="d3View"><canvas id="d3Ink"></canvas><div class="xh" aria-hidden="true"></div><div class="d3hint" id="d3Hint"></div></div>
     <div class="rotrow" id="d3Rot"></div>
+    <div class="sideCol" id="d3L">
     <div class="tb" id="d3Tools"></div>
     <div class="stamps" id="d3Stamps" hidden></div>
+    </div>
+    <div class="sideCol" id="d3R">
     <div class="pal" id="d3Pal" role="group" aria-label="クレヨンの いろ"></div>
     <p class="phint" id="d3Msg"></p>
     <div class="nmrow"><input type="text" id="d3Name" maxlength="10" placeholder="なまえ" aria-label="モンスターのなまえ"><button class="small" id="d3NmAuto">おまかせ なまえ</button></div>
     <button class="big" id="d3Done">できた！</button>
+    </div>
   </section>
 
   <!-- 描く -->
@@ -458,19 +541,24 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
     <div class="pad" id="pad"><div id="stack"></div><div class="hint" id="hint"></div><div class="drawView" id="drawView" data-c="tr" title="タップで いちを かえる" hidden><span>3D</span></div></div>
     <p class="phint" id="phint"></p>
     <div class="pal" id="tools" role="group" aria-label="クレヨンの いろ"></div>
+    <div class="sideCol" id="dL">
     <div class="tb" id="tools2"></div>
     <div class="stamps" id="stamps" hidden></div>
     <div class="tb" id="tools3" hidden></div>
+    </div>
+    <div class="sideCol" id="dR">
     <div class="legend" id="legend"></div>
     <div class="nmrow"><input type="text" id="nm" maxlength="10" placeholder="なまえ" value="" aria-label="モンスターのなまえ"><button class="small" id="nmAuto">おまかせ なまえ</button></div>
     <p class="msg" id="dmsg"></p>
     <button class="big" id="go">いのちを ふきこむ！</button>
+    </div>
     <p class="note">のうりょくは「まえ」の えで きまるよ。からだから ほそく のばした ところが、じどうで うで・あし・つのに なる。</p>
   </section>
 
   <!-- 確認・補正 -->
   <section id="sCard" class="screen" hidden>
     <div class="view" id="cardView"><div class="spin-hint">1本指で まわす（うしろも みてね）・2本指で ズーム</div></div>
+    <div class="cardSide">
     <div class="box">
       <div class="ttl" style="margin-bottom:8px">ほせい</div>
       <div class="seg" id="styles">
@@ -490,10 +578,12 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
     <div class="box shin"><div class="ttl">らくがき しんだん</div><ul id="cTraits"></ul></div>
     <p class="msg" id="cmsg"></p>
     <div class="row"><button id="redraw">かきなおす</button><button class="big" id="decide">このこに けってい！</button></div>
+    </div>
   </section>
 
   <!-- バトル -->
   <section id="sBattle" class="screen" hidden>
+    <div class="batMain">
     <div class="stage"><span id="stg">ステージ 1</span><span class="note" id="best"></span><span class="row" style="flex:0 1 auto;gap:6px"><button class="small snd">おと ON</button><button class="small vox">こえ ON</button></span></div>
     <div class="view" id="arenaView">
       <div class="overlay">
@@ -501,6 +591,8 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
         <div class="ov"><div class="nm" id="eN"></div><div class="hp"><i id="eHp"></i></div><div class="hprow"><span class="hpn" id="eHpN"></span><span class="gp" id="eG"></span></div></div>
       </div>
     </div>
+    </div>
+    <div class="batSide">
     <div class="log" id="log" aria-live="polite"></div>
     <div class="jk">
       <p class="hintE" id="hintE"></p>
@@ -513,6 +605,7 @@ input[type=text]{font-family:var(--f-display);font-size:18px;border:2.5px solid 
     </div>
     <p class="note">グーは チョキに、チョキは パーに、パーは グーに かつ。かった ほうが わざを だせるよ。ゲージが たまると ひっさつわざ！</p>
     <button class="back" id="mRun">にげる（ちずへ）</button>
+    </div>
   </section>
 
   <!-- 結果 -->
@@ -1358,7 +1451,7 @@ function init3D(){
   if(t==='pointerup'&&down&&tp.size===1&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<10&&performance.now()-down.t<400&&mode==='home'&&onTap)onTap(e);
   tp.delete(e.pointerId);sx=null;down=null}));
  el.addEventListener('wheel',e=>{if(!closeup()||mode==='draw')return;e.preventDefault();camZoom=zc(camZoom*(e.deltaY<0?1.1:1/1.1))},{passive:false});
- ['cardView','homeView','arenaView'].forEach(id=>new ResizeObserver(fit).observe($(id)));
+ ['cardView','homeView','arenaView','drawView','d3View'].forEach(id=>new ResizeObserver(fit).observe($(id)));
  requestAnimationFrame(loop);
 }
 function fit(){if(!viewEl)return;const w=viewEl.clientWidth,h=viewEl.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}
@@ -1762,7 +1855,7 @@ async function clash(ph,eh){ // あいこ：まんなかで ぶつかりあう
 
 /* ================= 画面切りかえ ================= */
 const S=['sHome','sList','sDraw','sCard','sBattle','sRes','sMap','sStory','sChoose','sDraw3d'];
-function show(id){S.forEach(s=>$(s).hidden=s!==id);const sg={sHome:'ranch',sList:'ranch',sDraw:'ranch',sCard:'ranch',sMap:'map',sChoose:'ranch',sDraw3d:'ranch'}[id];if(sg)bgm(sg);syncMute();document.body.classList.toggle('homeMode',id==='sHome');setMode({sCard:'card',sHome:'home',sBattle:'battle',sDraw:save.preview3d&&HAS3D?'draw':'none',sDraw3d:'draw3d'}[id]||'none');window.scrollTo({top:0,behavior:'smooth'})}
+function show(id){S.forEach(s=>$(s).hidden=s!==id);document.body.dataset.scr=id;const sg={sHome:'ranch',sList:'ranch',sDraw:'ranch',sCard:'ranch',sMap:'map',sChoose:'ranch',sDraw3d:'ranch'}[id];if(sg)bgm(sg);syncMute();document.body.classList.toggle('homeMode',id==='sHome');setMode({sCard:'card',sHome:'home',sBattle:'battle',sDraw:save.preview3d&&HAS3D?'draw':'none',sDraw3d:'draw3d'}[id]||'none');window.scrollTo({top:0,behavior:'smooth'})}
 const srcCache={};
 function loadImg(key,url){
  if(!url)return Promise.resolve(null);
@@ -2311,7 +2404,7 @@ function edSync(){
  $('d3Hint').textContent=ED.parts.length?ED_HINT[ED.tool]:'まずは まんなかに からだを かこんで かこう（2本指で まわす・ズーム）';
 }
 function edResize(){const ink=$('d3Ink'),r=ink.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);ink.width=Math.max(1,r.width*d);ink.height=Math.max(1,r.height*d)}
-window.addEventListener('resize',()=>{if(!$('sDraw3d').hidden)edResize()});
+window.addEventListener('resize',()=>{if(!$('sDraw3d').hidden)edResize();if(!$('sDraw').hidden)setView(1,0,0)});
 function inkDraw(){const ink=$('d3Ink'),g=ink.getContext('2d'),r=ink.getBoundingClientRect(),s=ink.width/(r.width||1);g.clearRect(0,0,ink.width,ink.height);
  if(ED.ink.length<2)return;g.lineCap=g.lineJoin='round';g.strokeStyle=K;g.lineWidth=7*s;g.beginPath();ED.ink.forEach((p,i)=>{const x=(p.x-r.left)*s,y=(p.y-r.top)*s;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
  g.strokeStyle=cur3.hex;g.lineWidth=4*s;g.stroke()}
@@ -2670,5 +2763,6 @@ syncMute();syncVoice();if(curMon())showHome();else startDraw(null);
 })();
 </script>
 
+<script>if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>
 </html>
