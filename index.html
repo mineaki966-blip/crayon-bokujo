@@ -1694,7 +1694,7 @@ function buildArena(){
  return g;
 }
 function buildRanch(){
- const g=new THREE.Group(),sh=o=>{o.traverse(x=>{if(x.isMesh){x.castShadow=true;x.receiveShadow=true}});return o};
+ const g=new THREE.Group(),sh=o=>o; // まわりの ものは かげを おとさない（かるく する）
  const ground=new THREE.Mesh(new THREE.CircleGeometry(16,64),new THREE.MeshToonMaterial({map:grassTex(),gradientMap:grad('cute')}));
  ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;g.add(ground);
  // つちの みち
@@ -1744,9 +1744,9 @@ function propsFor(key){ // エリアごとの けしき
  if(key==='tower'){for(let i=0;i<30;i++){const st=new THREE.Sprite(smat(pick(['#ffffff','#ffe27a','#bfa8ff'])));st.scale.setScalar(rnd(.2,.5));add(st,rnd(-12,12),rnd(3,9),rnd(-14,-8))}}
  g.traverse(o=>{if(o.isMesh)o.castShadow=true});arenaEnv.add(g);PROPS[key]=g;return g}
 function init3D(){
- renderer=new THREE.WebGLRenderer({antialias:true});
- renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
- renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ renderer=new THREE.WebGLRenderer({antialias:(window.devicePixelRatio||1)<2,powerPreference:'high-performance'});
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,QUAL.pr));
+ renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
  scene=new THREE.Scene();scene.background=new THREE.Color('#cdeafc');scene.fog=new THREE.Fog('#cdeafc',14,30);
  camera=new THREE.PerspectiveCamera(42,1,.1,60);
  hemi=new THREE.HemisphereLight('#ffffff','#e9dcc4',.75);scene.add(hemi);
@@ -2006,10 +2006,19 @@ function updateRanch(dt,t){
  // まんなかに はいりこんだ こは そとへ
  L.forEach(c=>{if(c===PC||(c.wd&&c.wd.wait<=0&&inLane(c.baseX,c.baseZ)))return;c.baseX=clamp(c.baseX,-3.4,3.2);c.baseZ=clamp(c.baseZ,-8.4,-4.3)});
 }
+/* かくつき たいさく：うごきが おもい ときは がめんの こまかさを じどうで さげる */
+const QUAL={pr:1.25,lvl:0,fr:[],cap:false,last:0};
+function qualTick(real){if(document.hidden)return;QUAL.fr.push(real);if(QUAL.fr.length<60)return;
+ const avg=QUAL.fr.reduce((a,b)=>a+b,0)/QUAL.fr.length;QUAL.fr=[];
+ if(avg>(QUAL.cap&&mode==='home'?1/27:1/50)&&QUAL.lvl<3){QUAL.lvl++;
+  if(QUAL.lvl===1){QUAL.pr=1;QUAL.cap=true}else if(QUAL.lvl===2){QUAL.pr=.85;renderer.shadowMap.type=THREE.BasicShadowMap;renderer.shadowMap.needsUpdate=true}else{QUAL.pr=.75;renderer.shadowMap.enabled=false;scene.traverse(o=>{if(o.material)o.material.needsUpdate=true})}
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,QUAL.pr));fit()}}
 function loop(){
  requestAnimationFrame(loop);
  if(!viewEl)return;
- const real=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;let dt=real*timeScale;
+ // ぼくじょうは ゆったり：おもい きかいでは 30コマに して なめらかさを たもつ
+ if(QUAL.cap&&mode==='home'){const now=performance.now();if(now-QUAL.last<31)return;QUAL.last=now}
+ const real=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;let dt=real*timeScale;qualTick(real);
  if(hitStop>0){hitStop-=real;dt=0}
  for(let i=tweens.length-1;i>=0;i--){const w=tweens[i];w.t+=dt*1000;const k=Math.min(1,w.t/w.ms);w.fn(k);if(k>=1){tweens.splice(i,1);w.res()}}
  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;if(p.life<=0){scene.remove(p.m);parts.splice(i,1);continue}
@@ -2056,7 +2065,7 @@ function loop(){
   camera.position.set(cam.fx*.6+Math.sin(cam.yaw)*dist+(Math.random()-.5)*s,hy+(Math.random()-.5)*s,Math.cos(cam.yaw)*dist);camera.lookAt(cam.fx,1.05,0);
   cam.roll+=((Math.random()-.5)*s*.12-cam.roll)*Math.min(1,real*12);camera.rotateZ(Math.sin(t*.3)*.015+cam.roll);
  }
- renderer.render(scene,camera);
+ if(mode!=='none')renderer.render(scene,camera); // 3Dの ない がめんでは えがかない
 }
 
 /* ---------- 演出 ---------- */
@@ -2748,7 +2757,7 @@ function buildCreature3D(parts,face,opt){
   if(r==='wing')c.wings.push({g:holder,s});
   if(r==='tail')c.tails.push({g:holder,i:c.tails.length});
  });
- if(MD){const mo=buildModel(opt.model.k,opt.model.c,style,c.disp,opt.model.r,opt.model.p);norm.add(mo.root);mo.meshes.forEach(m=>{m.userData.c=c;c.hit.push(m)});
+ if(MD){const mo=buildModel(opt.model.k,opt.model.c,style,c.disp,opt.model.r,opt.model.p,{merge:true});norm.add(mo.root);mo.root.traverse(m=>{if(m.isMesh&&m.material&&m.material.side!==THREE.BackSide){m.userData.c=c;c.hit.push(m)}});
   mo.groups.forEach(gp=>{const e={g:gp.g,s:gp.s};if(gp.r==='leg')c.legs.push(Object.assign(e,{x:gp.P.z*10+gp.P.x}));else if(gp.r==='arm')c.arms.push(Object.assign(e,{i:c.arms.length}));
    else if(gp.r==='wing')c.wings.push(e);else if(gp.r==='tail')c.tails.push(Object.assign(e,{i:c.tails.length}));else if(gp.r==='horn')c.horns.push(Object.assign(e,{i:c.horns.length}))})}
  c.legs.sort((a,b)=>a.x-b.x).forEach((l,i)=>l.i=i);
@@ -3312,7 +3321,7 @@ function modelRig(D,ro){ro=ro||{};const role=mi=>ro[mi]!=null?ro[mi]:D.ms[mi].g>
   if(b.r==='leg'||b.r==='arm')piv=[sx/n,sy,sz/n];
   const gi=gs.length;gs.push({r:b.r,p:piv,s:Math.sign(sx)||1});b.list.forEach(mi=>mg[mi]=gi)});
  return{gs,mg,role}}
-function buildModel(key,cols,style,store,ro,paints){const D=mdata(key);if(!D)return null;const RG=modelRig(D,ro);
+function buildModel(key,cols,style,store,ro,paints,opt){const D=mdata(key);if(!D)return null;const RG=modelRig(D,ro);
  const root=new THREE.Group(),toon=style==='cute'||style==='cool';
  const mat=toon?new THREE.MeshToonMaterial({vertexColors:true}):new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.85});
  const ol=style==='cute'?['#5a4038',.022]:style==='cool'?['#120e0c',.03]:null,olm=ol?new THREE.MeshBasicMaterial({color:ol[0],side:THREE.BackSide}):null;
@@ -3325,9 +3334,23 @@ function buildModel(key,cols,style,store,ro,paints){const D=mdata(key);if(!D)ret
   const gp=RG.mg[mi]>=0?groups[RG.mg[mi]]:null;if(gp){me.position.copy(gp.P).negate();gp.inn.add(me)}else root.add(me);
   if(olm){const r=geo.boundingSphere.radius||.1,c=geo.boundingSphere.center,s=Math.min(1.35,1+ol[1]/r),h=new THREE.Mesh(geo,olm);h.position.copy(c).multiplyScalar(1-s);h.scale.setScalar(s);me.add(h)}
   return me});
+ if(opt&&opt.merge)mergeModel(meshes,groups,root,mat,olm,ol,store,paints);
  if(paints)for(const k in paints){const me=meshes[+k];if(!me||!paints[k])continue;const im=new Image();
   im.onload=()=>{const pc=newCanvas(MTW,MTH);pc.getContext('2d').drawImage(im,0,0);me.userData.paint=pc;mTexMat(me,D,cols,style,pc);store&&store.push(me.material,me.userData.tex)};im.src=paints[k]}
  return{root,meshes,groups,D,mat,RG}}
+/* かるく する：うごく まとまりごとに 1つの かたちに まとめて、えがく かいすうを へらす（ゲームの なかだけ） */
+function mergeModel(meshes,groups,root,mat,olm,ol,store,paints){
+ const bins=new Map();
+ meshes.forEach(me=>{if(paints&&paints[me.userData.mi])return;const par=me.parent;if(!bins.has(par))bins.set(par,[]);bins.get(par).push(me)});
+ bins.forEach((list,par)=>{if(list.length<2&&!olm)return;let n=0;list.forEach(me=>n+=me.geometry.attributes.position.count);
+  const pos=new Float32Array(n*3),col=new Float32Array(n*3),hp=olm?new Float32Array(n*3):null;let o=0;
+  list.forEach(me=>{const g=me.geometry,P=g.attributes.position.array,C=g.attributes.color.array,off=me.position,c=g.boundingSphere.center,s=olm?Math.min(1.35,1+ol[1]/(g.boundingSphere.radius||.1)):1;
+   for(let i=0;i<P.length;i+=3){pos[o+i]=P[i]+off.x;pos[o+i+1]=P[i+1]+off.y;pos[o+i+2]=P[i+2]+off.z;col[o+i]=C[i];col[o+i+1]=C[i+1];col[o+i+2]=C[i+2];
+    if(hp){hp[o+i]=c.x+(P[i]-c.x)*s+off.x;hp[o+i+1]=c.y+(P[i+1]-c.y)*s+off.y;hp[o+i+2]=c.z+(P[i+2]-c.z)*s+off.z}}
+   o+=P.length;par.remove(me);me.geometry.dispose();me.userData.merged=true});
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));g.computeVertexNormals();
+  const m=new THREE.Mesh(g,mat);m.castShadow=true;par.add(m);store&&store.push(g);list[0].userData.mergedInto=m;list.forEach(me=>me.userData.mergedInto=m);
+  if(hp){const hg=new THREE.BufferGeometry();hg.setAttribute('position',new THREE.BufferAttribute(hp,3));const h=new THREE.Mesh(hg,olm);par.add(h);store&&store.push(hg)}})}
 /* まえから みた え（ポリゴンを うしろから じゅんに ぬる） */
 function modelTris(key,cols,R){const D=mdata(key),out=[],L=new THREE.Vector3(.35,.55,.75).normalize(),a=new THREE.Vector3(),b=new THREE.Vector3(),c=new THREE.Vector3(),n=new THREE.Vector3();
  D.ms.forEach((m,mi)=>{for(let t=0;t<m.I.length;t+=3){const ia=m.I[t],ib=m.I[t+1],ic=m.I[t+2];
