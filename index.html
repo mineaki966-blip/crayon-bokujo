@@ -2302,9 +2302,16 @@ async function ensureCre(m){
  if(old){c.baseX=old.c.baseX;c.baseZ=old.c.baseZ;c.baseRY=old.c.baseRY;disposeCreature(old.c)}else{const sp=freeSpot(c);c.baseX=sp.tx;c.baseZ=sp.tz}
  c.monId=m.id;CRE[m.id]={key,c};return c;
 }
+/* ぼくじょうに だす こは「いまの こ＋2たい」まで（おおいと おもく なるため）。じしゅトレが たまった こを さきに だす */
+const RANCH_OTHERS=2;let ranchPick=null;
+function ranchShow(){const cur=save.cur,others=save.mons.filter(m=>m.id!==cur);
+ if(!ranchPick||ranchPick.cur!==cur||ranchPick.n!==save.mons.length){
+  const sh=others.map(m=>({m,k:(autoPts(m)>0?100:0)+Math.random()*10})).sort((a,b)=>b.k-a.k).slice(0,RANCH_OTHERS).map(x=>x.m.id);ranchPick={cur,n:save.mons.length,ids:sh}}
+ return new Set([cur].concat(ranchPick.ids))}
 async function syncRanch(){
- for(const id in CRE)if(!save.mons.some(m=>m.id===id)){disposeCreature(CRE[id].c);delete CRE[id]}
- for(const m of save.mons)await ensureCre(m);
+ const show=ranchShow();
+ for(const id in CRE)if(!show.has(id)){disposeCreature(CRE[id].c);delete CRE[id]}
+ for(const m of save.mons)if(show.has(m.id))await ensureCre(m);
  PC=curMon()&&CRE[save.cur]?CRE[save.cur].c:null;
 }
 function statRows(st,max){const row=(l,v,mx,col)=>`<div class="stat"><span>${l}</span><span class="bar"><i style="width:${Math.min(100,v/mx*100)}%;background:${col}"></i></span><b>${v}</b></div>`;
