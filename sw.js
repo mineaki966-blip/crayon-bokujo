@@ -1,5 +1,5 @@
 // クレヨン牧場：オフラインでも あそべるように ファイルを しまっておく
-const CACHE='crayon-bokujo-v3';
+const CACHE='crayon-bokujo-v17';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable.png','./apple-touch-icon.png',
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>Promise.all(CORE.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting()))});
